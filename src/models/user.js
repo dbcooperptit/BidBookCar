@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
+var randomstring = require('randomstring')
 let DEFAULT_USER_PICTURE = '/images/defaultAvatart.png';
 
 UserSchema = mongoose.Schema({
@@ -46,6 +47,29 @@ UserSchema = mongoose.Schema({
 });
 
 UserSchema.pre('save', function(next) {
+    var user = this;
+
+    if(!user.picture){
+        user.picture = DEFAULT_USER_PICTURE;
+    }
+    user._id = randomstring.generate({
+       length:16,
+       charset:'alphanumeric'
+    });
+    if (!user.isModified('password')) return next();
+
+    bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+        if (err) return next(err);
+
+        bcrypt.hash(user.password, salt, null, function(err, hash) {
+            if (err) return next(err);
+
+            user.password = hash;
+            next();
+        });
+    });
+});
+UserSchema.pre('update', function(next) {
     var user = this;
 
     if(!user.picture){
