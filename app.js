@@ -16,7 +16,7 @@ var usersRouter = require('./routes/users');
 var adminsRouter = require('./routes/admins');
 var driversRouter = require('./routes/drivers');
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3001;
 
 
 //Connect database

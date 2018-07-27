@@ -1,9 +1,9 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var randomstring = require('randomstring')
-let DEFAULT_USER_PICTURE = '/images/defaultAvatart.png';
-
-UserSchema = mongoose.Schema({
+const DEFAULT_USER_PICTURE = '/images/defaultAvatar.png';
+const SALT_WORK_FACTOR = 10;
+var UserSchema =new mongoose.Schema({
     _id: {
       type: String
     },
@@ -34,7 +34,8 @@ UserSchema = mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'driver', 'user']
+        enum: ['admin', 'driver', 'user'],
+        default:'user'
     },
     createAt:{
         type: Date,
@@ -44,7 +45,7 @@ UserSchema = mongoose.Schema({
         type: Boolean,
         default: false
     }
-});
+},{_id:false});
 
 UserSchema.pre('save', function(next) {
     var user = this;
@@ -96,8 +97,5 @@ UserSchema.methods.validatePassword = function(password, callback) {
         callback(null, isMatch);
     });
 };
-// UserSchema.methods.validatePassword = function(password) {
-//     return bcrypt.compareSync(password, this.password);
-// };
-module.exports = mongoose.Schema('User',UserSchema);
+module.exports = mongoose.model('User',UserSchema);
 

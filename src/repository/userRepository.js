@@ -39,6 +39,7 @@ UserRepository.findById = async (id) =>{
         throw e;
     }
 };
+
 /*
 * Tìm kiếm người dùng duy nhất theo điều kiện đầu vào
 * data: điều kiện tìm kiếm ex: {'email':'sangnguyen@asd','fullName':'Sang Nguyen'}*/
@@ -65,12 +66,12 @@ UserRepository.findAll = async () =>{
 * data: Dữ liệu người dùng*/
 UserRepository.findByIdAndUpdate = async (data) =>{
   try {
-      let userStore = await User.findById(data._id);
+      let userStore = await User.findById(data.id);
       if (!userStore){
           console.log('Can not find user in database');
           return null;
       }
-      await User.update({'_id': data._id},{
+      await User.update({'_id': data.id},{
           $set:{
               'fullName': data.fullName,
               'email': data.email,
