@@ -5,16 +5,20 @@ var PostRepository ={};
 PostRepository.findAll = async()=>{
     try {
         let dataStore = await Post.find();
-        let currentTime = Date.now();
-        let dataValid = dataStore.filter(x => {
-            let timePost = new Date(x.expiredTime);
-            return timePost - currentTime > 0;
-        });
-        return dataValid;
+        return dataStore;
     }  catch (e) {
         console.log("find all post error "+e.message);
         throw e;
     }
+};
+
+PostRepository.findByPredicate = async (data) =>{
+  try {
+      let dataStore = await Post.find(data);
+      return dataStore;
+  }  catch (e) {
+      throw e;
+  }
 };
 
 PostRepository.findById = async (id) =>{

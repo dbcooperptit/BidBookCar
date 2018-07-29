@@ -97,5 +97,6 @@
       };
       var showDistance = (response) =>{
         var myRoute = response.routes[0].legs[0];
-        $("#distance-two-point").text(myRoute.distance.text)
-      }
+        $("#distance-two-point").text(myRoute.distance.text);
+        $("#caculator-money").click();
+      };

@@ -8,13 +8,17 @@ var PostSchema =new mongoose.Schema({
        type: String,
        required: true
    },
-    destination:{
+    totalDistance:{
         type: String,
         required: true
     },
     location: {
         type: String,
         required: true
+    },
+    destination: {
+      type: String,
+      required: true
     },
     status:{
         type: String
@@ -30,6 +34,10 @@ var PostSchema =new mongoose.Schema({
             awaitTime: Date
         }],
         ref:'BID'
+    },
+    init_money: {
+      type: Number,
+      required: true
     },
     expiredTime:{
         type: Date,

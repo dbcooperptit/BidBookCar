@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var randomstring = require('randomstring')
-const DEFAULT_USER_PICTURE = '/images/defaultAvatar.png';
+const DEFAULT_USER_PICTURE = '/images/defaultAvatar.jpg';
 const SALT_WORK_FACTOR = 10;
 var UserSchema =new mongoose.Schema({
     _id: {
