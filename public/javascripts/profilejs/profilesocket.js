@@ -35,11 +35,35 @@ var bidSocket = {
 
         socket.on("newPost", data => {
             $("#book-bike").css('display','block');
-            displayUser(data.user,data.newPost.createAt);
+            displayUser(data.user,data.newPost.createAt,data.newPost._id);
             displayPost(data.newPost);
             countDown(data.newPost.expiredTime);
             $('#id_post').val(data.newPost._id);
             $('#close-modal').click();
+        });
+
+        $("#book-bike").on('click','#add-new-status',(evt) =>{
+            let newStatus = $('#add-new-status').closest('.input-group').find('.form-control').val();
+            let postId = $('#id_post').val();
+            socket.emit('change_status_post',{newStatus:newStatus,postId:postId})
+        });
+
+        socket.on('error_change_status',data =>{
+            bootbox.alert({
+                message: data,
+                className: 'bb-alternate-modal'
+            });
+        });
+
+        socket.on('success_change_status',data => {
+            $('.trip-info').text(data.newStatus);
+            $('#add-new-status').closest('.input-group').find('.form-control').val('');
+        });
+
+        $('#end-timeout').click(evt =>{
+            let value = $('#end-timeout').attr('data-value');
+            let postId = $('#id_post').val();
+            socket.emit('adjourn_post',{value: value,postId:postId});
         });
 
         socket.on('error_post', data => {
@@ -48,6 +72,15 @@ var bidSocket = {
             $(err).text(data.message);
         });
 
+        socket.on('success_adjourn',data => {
+            console.log(data);
+            if (data.isHidden){
+                $('#book-bike').css('display','none');
+            } else{
+                let newTime = data.expiredTime;
+                countDown(newTime);
+            };
+        });
         socket.on('reconnect', () => {
             location.reload();
         });
@@ -118,8 +151,9 @@ var displayPost = (post) => {
         '<span class="badge bg-red" id="count-downs"></span>';
     $("#post-book-bike .box-body .user-block").after(html);
 };
-var displayUser = (user,datePost) => {
-    let html = '<div class="user-block">' +
+
+var displayUser = (user,datePost,postId) => {
+    let html = '<input id="id_post" type="hidden" value="'+postId+'"/><div class="user-block">' +
         '<img class="img-circle img-bordered-sm" src="'+user.picture+'" alt="user image">' +
         '<span class="username">' +
         '<a href="#">'+user.fullName+'</a>' +
@@ -149,7 +183,15 @@ var countDown = (time) =>{
         // If the count down is finished, write some text
         if (distance < 0) {
             clearInterval(x);
-            alert("expired time");
+            bootbox.prompt({
+                title: "Would you want to renew!",
+                inputType: 'number',
+                callback: function (result) {
+                    let value = result == null ? 0: result;
+                    $('#end-timeout').attr('data-value',value);
+                    $('#end-timeout').click();
+                }
+            });
         }
     }, 1000);
 

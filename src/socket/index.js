@@ -52,6 +52,48 @@ var processEvent = (io) =>{
                 //socket.broadcast.emit('driverIndexNewPost',newPost);
             }
         });
+
+        socket.on('change_status_post', async data =>{
+           let postId = data.postId;
+           let postStore = await postRepository.findById(postId);
+           if (!postStore){
+               socket.emit('error_change_status',{message: 'Post already exist'});
+           } else{
+               let currentTime = Date.now();
+               let expiredTime = new Date(postStore.expiredTime);
+               if (expiredTime - currentTime < 0){
+                   socket.emit('error_change_status',{message: 'Post expired time'});
+                   return;
+               }
+               await postRepository.updateStatus({'id':data.postId,'status':data.newStatus});
+               socket.emit("success_change_status",data);
+           }
+        });
+
+        socket.on('adjourn_post',async data =>{
+            let postId = data.postId;
+            let postStore = await postRepository.findById(postId);
+            if (!postStore){
+                socket.emit('error_change_status',{message: 'Post already exist'});
+                console.log('Lỗi rồi');
+                return;
+            } else {
+                let expiredTime;
+                let isHidden = false;
+                if (data.value > 0)
+                {
+                    let currentTime = new Date();
+                    let parseTime = data.value * 60 * 1000;
+                    expiredTime = new Date(currentTime.getTime() + parseTime);
+                    await postRepository.updateExpiredTime({'postId':data.postId,'expiredTime':expiredTime});
+                }else{
+                    expiredTime = postStore.expiredTime;
+                    isHidden = true;
+                }
+                console.log({'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden});
+                socket.emit('success_adjourn',{'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden});
+            }
+        });
     });
 };
 

@@ -409,14 +409,15 @@
                                                 <% }) %>
                                                 <% } %>
                                             </div>
+                                            <span hidden="hidden" id="end-timeout"></span>
                                         </div>
                                         <div class="box-footer">
                                             <div class="input-group">
-                                                <input class="form-control" id="add-new-status"
+                                                <input class="form-control"
                                                        placeholder="Type message...">
 
                                                 <div class="input-group-btn">
-                                                    <button type="button" class="btn btn-success"><i
+                                                    <button type="button" class="btn btn-success" id="add-new-status"><i
                                                                 class="fa fa-plus"></i></button>
                                                 </div>
                                             </div>
@@ -782,6 +783,7 @@
 <!-- Bootstrap 3.3.7-->
 <script src="/javascripts/profilejs/bootstrap.min.js"></script>
 <script src="/javascripts/profilejs/adminlte.min.js"></script>
+<script src="/vendor/bootbox/bootbox.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/profilejs/profilesocket.js"></script>
 <script>

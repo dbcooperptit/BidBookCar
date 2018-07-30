@@ -55,19 +55,32 @@ PostRepository.addPost = async (data) =>{
     }
 };
 
-PostRepository.updatePost = async (data) => {
+PostRepository.updateExpiredTime = async (data) => {
   try {
-      await PostRepository.update({'_id':data._id},{
+      await Post.update({'_id':data.id},{
           $set:{
-              status: data.status,
               expiredTime: data.expiredTime
           }
       });
-      console.log('update post success');
+      console.log('update status post success');
   }  catch (e) {
       console.log('update err');
       throw e;
   }
+};
+
+PostRepository.updateStatus = async (data) => {
+    try {
+        await Post.update({'_id':data.id},{
+            $set:{
+                status: data.status
+            }
+        });
+        console.log('update status post success');
+    }  catch (e) {
+        console.log('update err');
+        throw e;
+    }
 };
 
 PostRepository.updateOrCreateBid = async (data) =>{
