@@ -35,7 +35,15 @@ LoginController.doRegister = async (req, res, next) =>{
                     break;
                 case 'driver':
                     let phone = req.body.phone;
-                    await userRepository.addUser({email:email,password:password,fullName:fullName,isActive:false,phone:phone});
+                    await userRepository.addUser(
+                        {
+                            email:email,
+                            password:password,
+                            fullName:fullName,
+                            isActive:false,
+                            phone:phone,
+                            role: 'driver'
+                        });
 
                     req.flash('success', 'Your account has been created. Please log in.');
                     res.redirect('/login');
