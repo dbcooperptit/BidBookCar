@@ -1,6 +1,8 @@
 var User  = require('../models/user');
 var AuthorizationController = {};
 
+
+// Phân quyền truy cập
 AuthorizationController.roleAuthorization = roles =>{
     return function(req, res, next){
 
@@ -36,6 +38,10 @@ AuthorizationController.getUrlByRoles = (req, res) =>{
             return '/drivers';
     }
 };
+
+// Kiểm tra người dùng đã đăng nhập hay chưa
+// Nếu rồi thì tiếp tục
+// Chưa thì quay về trang login
 AuthorizationController.isAuthenticated = (req, res, next) =>{
     if(req.isAuthenticated()){
         return next();

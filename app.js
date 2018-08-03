@@ -17,17 +17,9 @@ var adminsRouter = require('./routes/admins');
 var driversRouter = require('./routes/drivers');
 
 var port = process.env.PORT || 3001;
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1:27017/BidBookACar',{ useNewUrlParser: true});
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  // we're connected!
-  console.log("\nconnection database successfull!")
-});
 
 //Connect database
-// Mongoose();
+Mongoose();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
