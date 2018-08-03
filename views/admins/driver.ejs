@@ -10,25 +10,33 @@
 	<meta name="author" content="duybach">
 
 	<title><%= title %></title>
-
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css"/>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
 	<!-- Bootstrap Core CSS -->
-    <link href="/admin/stylesheets/bootstrap.min.css" rel="stylesheet">
+	<link href="/admin/stylesheets/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <link href="/admin/stylesheets/sb-admin.css" rel="stylesheet">
+	<!-- Custom CSS -->
+	<link href="/admin/stylesheets/sb-admin.css" rel="stylesheet">
+	<link href="/admin/stylesheets/jquery.dataTables.min.css" rel="stylesheet">
+	<script src="/admin/javascripts/jquery.dataTables.min.js"></script>
 
-    <!-- Morris Charts CSS -->
-    <link href="/admin/stylesheets/plugins/morris.css" rel="stylesheet">
+	<!-- Morris Charts CSS -->
+	<link href="/admin/stylesheets/plugins/morris.css" rel="stylesheet">
 
-    <!-- Custom Fonts -->
-    <link href="/admin/stylesheets/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<!-- Custom Fonts -->
+	<link href="/admin/stylesheets/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+	<script type="text/javascript">
+		$(document).ready( function () {
+			$('#myTable').DataTable();
+		});	
+		$(document).ready(function() {
+    $('#example').DataTable( {
+        "order": [[ 3, "desc" ]]
+    } );
+} );
+	</script>
 
 </head>
 
@@ -46,7 +54,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="dashboard.html">Team Ptit</a>
+				<a class="navbar-brand" href="/admins/">Team Ptit</a>
 			</div>
 			<!-- Top Menu Items -->
 			<ul class="nav navbar-right top-nav">
@@ -60,7 +68,7 @@
 										<img class="media-object" src="http://placehold.it/50x50" alt="">
 									</span>
 									<div class="media-body">
-										<h5 class="media-heading"><strong>John Smith</strong>
+										<h5 class="media-heading"><strong>Team Ptit</strong>
 										</h5>
 										<p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
 										<p>Lorem ipsum dolor sit amet, consectetur...</p>
@@ -156,10 +164,10 @@
 						<a href="/admins/"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
 					</li>
 					<li>
-						<a href="customer"><i class="fa fa-fw fa-bar-chart-o"></i> Customer</a>
+						<a href="/admins/customer"><i class="fa fa-fw fa-bar-chart-o"></i> Customer</a>
 					</li>
 					<li>
-						<a href="driver"><i class="fa fa-fw fa-table"></i> Driver</a>
+						<a href="/admins/driver"><i class="fa fa-fw fa-table"></i> Driver</a>
 					</li>
 
 					<li>
@@ -180,10 +188,10 @@
 		</nav>
 
 		<div id="page-wrapper">
-			<h1 class="text-center">Manager Customer</h1>
+			<h1 class="text-center">Manager Driver</h1>
 
 			<!-- /.container-fluid -->
-			<table class="table table-stdiped table-hover table-border">
+			<table class="table table-stdiped table-hover table-border" id="myTable">
 				<thead>
 					<th>#</th>
 					<th>Avatar</th>
@@ -193,66 +201,86 @@
 					<th>Status</th>
 				</thead>
 				<tbody>
-					<tr >
-						<td>1</td>
-						<td><img src="/admin/images/bg_admin.png" alt="" width="100" height="100"></td>
-						<td>duy</td>
-						<td>duybahc@gmail.com</td>
-						<td>0985588257</td>
-						<td>
-							<a href="#" title="" class="btn btn-success center">&#160;Lock&#160;</a>
-						</td>
-					</tr>
-					<tr>
-						<td>1</td>
-						<td><img src="/admin/images/bg_admin.png" alt="" width="100" height="100"></td>
-						<td>duy</td>
-						<td>duybahc@gmail.com</td>
-						<td>0985588257</td>
-						<td>
-							<a href="#" title="" class="btn btn-default center">Active</a>
-						</td>
-					</tr>
+					<% data.forEach(function(motphantu, index){ 
+						var status = "";
+						var color_status = "";
+						if(motphantu.isActive == true){
+							status = "Lock";
+							color_status = "success";
+						}else{
+							status = "Active";
+							color_status = "default";
+						}
 
 
-				</tbody>
-			</table>
-			<nav aria-label="Page navigation" class="text-center">
-				<ul class="pagination">
-					<li>
-						<a href="#" aria-label="Previous">
-							<span aria-hidden="true">&laquo;</span>
-						</a>
-					</li>
-					<li><a href="#">1</a></li>
-					<li><a href="#">2</a></li>
-					<li><a href="#">3</a></li>
-					<li><a href="#">4</a></li>
-					<li><a href="#">5</a></li>
-					<li>
-						<a href="#" aria-label="Next">
-							<span aria-hidden="true">&raquo;</span>
-						</a>
-					</li>
-				</ul>
-			</nav>
+						%>
+						<tr >
+							<td><%= index+1 %></td>
+							<td><img src="/admin<%= motphantu.picture %>" alt="picture.jpg" width="100" height="100"></td>
+							<td><%= motphantu.fullName %></td>
+							<td><%= motphantu.email %></td>
+							<td><%= motphantu.phone %></td>
+							<td>
+								<a  data-id= "<%= motphantu._id%>" data-bind="<%= motphantu.isActive %>" data-action='<%= status%>' class="active-driver btn btn-<%= color_status %> center"><%= status %></a>
+							</td>
+						</tr>
+						<% }); %>
+
+
+					</tbody>
+				</table>
+
+			</div>
+			<!-- /#page-wrapper -->
+
 		</div>
-		<!-- /#page-wrapper -->
+		<!-- /#wrapper -->
 
-	</div>
-	<!-- /#wrapper -->
+		<!-- jQuery -->
+		<!-- <script src="/admin/javascripts/jquery.js"></script> -->
 
-    <!-- jQuery -->
-    <script src="/admin/javascript/jquery.js"></script>
+		<!-- Bootstrap Core JavaScript -->
+		<script src="/admin/javascripts/bootstrap.min.js"></script>
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="/admin/javascript/bootstrap.min.js"></script>
+		<!-- Morris Charts JavaScript -->
+		<script src="/admin/javascripts/plugins/morris/raphael.min.js"></script>
+		<script src="/admin/javascripts/plugins/morris/morris.min.js"></script>
+		<script src="/admin/javascripts/plugins/morris/morris-data.js"></script>
+		
 
-    <!-- Morris Charts JavaScript -->
-    <script src="/admin/javascript/plugins/morris/raphael.min.js"></script>
-    <script src="/admin/javascript/plugins/morris/morris.min.js"></script>
-    <script src="/admin/javascript/plugins/morris/morris-data.js"></script>
 
-</body>
 
-</html>
+
+<script type="text/javascript">
+
+	$(".active-driver").click(function(){
+		var id = $(this).attr("data-id");
+		var active_user = $(this).attr("data-bind");
+		var active = active_user === "true" ? false : true;
+
+		$.ajax({
+			url : "/admins/activeDriverAjax",
+			type : "POST",
+			dataType: 'json',
+			data :{id:id ,active:active},
+			success : function(result){
+				if(result.status === 'OK'){
+					window.location.reload(true);
+				}else{
+					alert('That bai');
+				}
+				return false;
+            // dung chuong trinh
+        },
+        error: function(err){
+        	console.log(err.responseText);
+        }
+    });
+	})
+
+</script>
+
+
+	</body>
+
+	</html>

@@ -23,7 +23,7 @@ body {
 
 #page-wrapper {
     width: 100%;
-    height: 650px;
+    height: auto;
     padding: 0;
     background-color: #fff;
 }
