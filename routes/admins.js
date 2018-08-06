@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var adminController = require('../src/controller/adminController.js');
+var authController = require("../src/controller/authorizationController.js")
 /* GET users listing. */
 router.get('/', function(req, res, next) {
     res.render('admins/dashboard', { title: 'Dashboard' });
