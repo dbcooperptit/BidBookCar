@@ -49,7 +49,7 @@ var processEvent = (io) =>{
 
                 newPost = await postRepository.addPost(newPost);
                 socket.emit('newPost', {'newPost': newPost, 'user': userCurrent});
-                //socket.broadcast.emit('driverIndexNewPost',newPost);
+                socket.broadcast.emit('driverIndexNewPost',{'newPost': newPost, 'user': userCurrent});
             }
         });
 
@@ -94,9 +94,46 @@ var processEvent = (io) =>{
                 socket.emit('success_adjourn',{'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden});
             }
         });
+
+        socket.on('driverBid',async data =>{
+            console.log('Update bid: ' + data.postId + data.bid + data.arrivalTime);
+            try {
+                if (!data.postId || !data.bid || !data.arrivalTime) {
+                    console.log('Input not null');
+                    socket.emit('driverIndexError', {message: 'Input not null'});
+                } else {
+                    if (!socket.request.session.passport) {
+                        return;
+                    }
+                    let userId = socket.request.session.passport.user;
+                    let curentTime = new Date();
+                    let arrivalTime = new Date(curentTime.getTime() + data.arrivalTime*60*1000);
+                    let newData = {
+                        id: data.postId,
+                        driverId: userId,
+                        price: data.bid,
+                        awaitTime: arrivalTime
+                    }
+
+                    await postRepository.updateOrCreateBid(newData);
+
+                    let posts = await postRepository.findById(data.postId);
+                    let bidColl = posts.bid.sort(sortBID);
+                    console.log('BID Sort'+bidColl);
+                    socket.emit('driverIndexSuccess',{message:'BID success',bid: data});
+                    socket.broadcast.to(posts.userId+"_private").emit('driverBid',{ 'allBid': bidColl});
+                }
+            } catch(e){
+                socket.emit('driverIndexError', {message: e.message});
+            }
+        });
     });
 };
-
+let sortBID = (a,b) =>{
+    if (a.price > b.price) return -1;
+    if (a.price < b.price) return 1;
+    return 0;
+};
 var init = (app) =>{
 
     let server 	= require('http').Server(app);

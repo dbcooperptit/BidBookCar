@@ -85,15 +85,15 @@ PostRepository.updateStatus = async (data) => {
 
 PostRepository.updateOrCreateBid = async (data) =>{
   try {
-    let dataStore = await PostRepository.findById(data.id);
+    let dataStore = await Post.findById(data.id);
     if (!dataStore){
         console.log('update bid error');
         return;
     } else{
-        let driversInStore = PostRepository.find({'bid.driverId': data.driverId});
+        let driversInStore = await Post.findOne({'_id':dataStore._id,'bid.driverId': data.driverId});
         if (driversInStore){
             console.log('driver is valid');
-            PostRepository.update({'_id':dataStore._id,'bid.driverId':data.driverId},{
+            await Post.update({'_id':dataStore._id,'bid.driverId':data.driverId},{
                 $set:{
                     'bid.$.price':data.price,
                     'bid.$.awaitTime':data.awaitTime
@@ -102,12 +102,13 @@ PostRepository.updateOrCreateBid = async (data) =>{
             console.log('update bid success');
             return;
         }
+        console.log('driver not valid. dataStore Id: '+dataStore._id);
         let newBid = {
             driverId: data.driverId,
             awaitTime: data.awaitTime,
             price: data.price
         };
-        PostRepository.update({'_id':dataStore._id},{
+        await Post.update({'_id':dataStore._id},{
             $push:{
                 'bid': newBid
             }
@@ -115,7 +116,7 @@ PostRepository.updateOrCreateBid = async (data) =>{
         console.log('update bid success');
     }
   } catch (e) {
-
+    throw e;
   }
 };
 
