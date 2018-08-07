@@ -34,57 +34,97 @@ var bidSocket = {
         });
 
         socket.on("newPost", data => {
-            $("#book-bike").css('display','block');
-            displayUser(data.user,data.newPost.createAt,data.newPost._id);
+            $("#book-bike").css('display', 'block');
+            displayBlockPost();
+            displayUser(data.user, data.newPost.createAt, data.newPost._id);
             displayPost(data.newPost);
             countDown(data.newPost.expiredTime);
             $('#id_post').val(data.newPost._id);
             $('#close-modal').click();
         });
 
-        $("#book-bike").on('click','#add-new-status',(evt) =>{
+        $("#book-bike").on('click', '#add-new-status', (evt) => {
             let newStatus = $('#add-new-status').closest('.input-group').find('.form-control').val();
             let postId = $('#id_post').val();
-            socket.emit('change_status_post',{newStatus:newStatus,postId:postId})
+            socket.emit('change_status_post', {newStatus: newStatus, postId: postId})
         });
 
-        socket.on('error_change_status',data =>{
+        socket.on('error_change_status', data => {
             bootbox.alert({
                 message: data,
                 className: 'bb-alternate-modal'
             });
         });
 
-        socket.on('success_change_status',data => {
+        socket.on('success_change_status', data => {
             $('.trip-info').text(data.newStatus);
             $('#add-new-status').closest('.input-group').find('.form-control').val('');
         });
 
-        $('#end-timeout').click(evt =>{
+        $('#end-timeout').click(evt => {
             let value = $('#end-timeout').attr('data-value');
             let postId = $('#id_post').val();
-            socket.emit('adjourn_post',{value: value,postId:postId});
+            socket.emit('adjourn_post', {value: value, postId: postId});
         });
 
         socket.on('error_post', data => {
             let err = $("#await-time").next();
-            $(err).css('display','block');
+            $(err).css('display', 'block');
             $(err).text(data.message);
         });
 
-        socket.on('success_adjourn',data => {
+        socket.on('success_adjourn', data => {
             console.log(data);
-            if (data.isHidden){
-                $('#book-bike').css('display','none');
-            } else{
+            if (data.isHidden) {
+                $('#book-bike').css('display', 'none');
+            } else {
                 let newTime = data.expiredTime;
                 countDown(newTime);
             };
+        });
+
+        socket.on('driverBidToUser', data => {
+            console.log(data);
+            displayListBid(data.allBid);
         });
         socket.on('reconnect', () => {
             location.reload();
         });
     }
+};
+let displayBlockPost = () =>{
+    let html =' <div class="col-md-8" id="post-book-bike">\n' +
+        '    <div class="box box-success">\n' +
+        '        <div class="box-header ui-sortable-handle" style="cursor: move;">\n' +
+        '            <div class="box-tools pull-right" data-toggle="tooltip" title="Status">\n' +
+        '                <i class="fa fa-comments-o"></i>\n' +
+        '                <h3 class="box-title">Book Bike</h3>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '        <div class="box-body">\n' +
+        '\n' +
+        '            <input id="id_post" type="hidden" value="" />\n' +
+        '\n' +
+        '            <span hidden="hidden" id="end-timeout"></span>\n' +
+        '        </div>\n' +
+        '        <div class="box-footer">\n' +
+        '            <div class="input-group">\n' +
+        '                <input class="form-control" placeholder="Type message...">\n' +
+        '\n' +
+        '                <div class="input-group-btn">\n' +
+        '                    <button type="button" class="btn btn-success" id="add-new-status">\n' +
+        '                        <i class="fa fa-plus"></i>\n' +
+        '                    </button>\n' +
+        '                </div>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '    </div>\n' +
+        '</div>\n' +
+        '<div class="col-md-4">\n' +
+        '    <div class="box" id="list-driver-bid">\n' +
+        '    </div>\n' +
+        '</div>';
+    $('#book-bike').html(html);
 };
 
 var displayPost = (post) => {
@@ -145,29 +185,118 @@ var displayPost = (post) => {
 
         '<p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">' +
         '<i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thôngtin tập trung</p>' +
-        '<p class="trip-info">' + post.status + '</p>'+
-        '<p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">'+
+        '<p class="trip-info">' + post.status + '</p>' +
+        '<p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">' +
         '<i class="fa fa-times-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thời gian đấu giá còn lại</p>' +
         '<span class="badge bg-red" id="count-downs"></span>';
     $("#post-book-bike .box-body .user-block").after(html);
 };
 
-var displayUser = (user,datePost,postId) => {
-    let html = '<input id="id_post" type="hidden" value="'+postId+'"/><div class="user-block">' +
-        '<img class="img-circle img-bordered-sm" src="'+user.picture+'" alt="user image">' +
+var displayUser = (user, datePost, postId) => {
+    let html = '<input id="id_post" type="hidden" value="' + postId + '"/><div class="user-block">' +
+        '<img class="img-circle img-bordered-sm" src="' + user.picture + '" alt="user image">' +
         '<span class="username">' +
-        '<a href="#">'+user.fullName+'</a>' +
+        '<a href="#">' + user.fullName + '</a>' +
         '</span>' +
-        '<span class="description">'+datePost+'</span>' +
+        '<span class="description">' + datePost + '</span>' +
         '</div>';
     $("#post-book-bike .box-body").append(html);
 };
 
-var countDown = (time) =>{
-    var countDownDate = new Date(time ).getTime();
+var displayListBid = (data) => {
+    var trHtml = trListBid(data);
+    var html = ' <div class="box-header">\n' +
+        '                                                   <h3 class="box-title">List Driver BID</h3>\n' +
+        '                                                    </div> <div class="box-body no-padding">\n' +
+        '                                                        <table class="table table-striped">\n' +
+        '                                                            <tbody>\n' +
+        '                                                                <tr>\n' +
+        '                                                                    <th style="width: 10px">#</th>\n' +
+        '                                                                    <th>Tên tài xế</th>\n' +
+        '                                                                    <th>Giá tiền</th>\n' +
+        '                                                                    <th style="width: 40px">Giờ đón</th>\n' +
+        '                                                                </tr>\n' +
+        trHtml +
+        '                                                            </tbody>\n' +
+        '                                                        </table>\n' +
+        '                                                    </div>';
+    $('#list-driver-bid').html(html);
+};
+
+var trListBid = (data) => {
+    var html = '';
+    //Top 1
+    if(data.length>0) {
+        html +=
+            '<tr>\n' +
+            '                                                                    <td>' + 0 + '</td>\n' +
+            '                                                                    <td>' + data[0].fullName + '</td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <span class="badge bg-red">' + data[0].price + ' VNĐ</span>\n' +
+            '                                                                   </td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <span class="badge bg-red">' + localDateTime(data[0].awaitTime) + '</span>\n' +
+            '                                                                    </td>\n' +
+            '                                                                </tr>\n';
+    }
+    //Top 2
+    if(data.length>1) {
+        html +=
+            '<tr>\n' +
+            '                                                                    <td>' + 1 + '</td>\n' +
+            '                                                                    <td>' + data[1].fullName + '</td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <span class="badge bg-warning">' + data[1].price + ' VNĐ</span>\n' +
+            '                                                                   </td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <span class="badge bg-warning">' + localDateTime(data[1].awaitTime) + '</span>\n' +
+            '                                                                    </td>\n' +
+            '                                                                </tr>\n';
+    }
+    //Top 3
+    if (data.length > 2) {
+        html +=
+            '<tr>\n' +
+            '                                                                    <td>' + 2 + '</td>\n' +
+            '                                                                    <td>' + data[2].fullName + '</td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <span class="badge bg-aqua ">' + data[2].price + ' VNĐ</span>\n' +
+            '                                                                   </td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <span class="badge bg-aqua ">' + localDateTime(data[2].awaitTime) + '</span>\n' +
+            '                                                                    </td>\n' +
+            '                                                                </tr>\n';
+    }
+    //Top 4-> n;
+    if(data.length >3) {
+        for (x = 3; x < data.length; x++) {
+
+            html +=
+                '<tr>\n' +
+                '                                                                    <td>' + x + '</td>\n' +
+                '                                                                    <td>' + data[x].fullName + '</td>\n' +
+                '                                                                    <td>\n' +
+                '                                                                        <span class="badge bg-default">' + data[x].price + ' VNĐ</span>\n' +
+                '                                                                   </td>\n' +s
+                '                                                                    <td>\n' +
+                '                                                                        <span class="badge bg-default">' + localDateTime(data[x].awaitTime) + '</span>\n' +
+                '                                                                    </td>\n' +
+                '                                                                </tr>\n';
+        }
+    }
+    return html;
+};
+
+var localDateTime = (time) =>{
+    let convertTime = new Date(time);
+    return convertTime.toLocaleTimeString();
+};
+
+var countDown = (time) => {
+    var countDownDate = new Date(time).getTime();
 
 // Update the count down every 1 second
-    var x = setInterval(function() {
+    var x = setInterval(function () {
 
         var now = new Date().getTime();
 
@@ -178,8 +307,8 @@ var countDown = (time) =>{
         var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
         // Display the result in the element with id="demo"
-        document.getElementById("count-downs").innerHTML = minutes + "m " + seconds + "s ";
-
+       // document.getElementById("count-downs").innerHTML = minutes + "m " + seconds + "s ";
+        $("#count-downs").text( minutes + "m " + seconds + "s ");
         // If the count down is finished, write some text
         if (distance < 0) {
             clearInterval(x);
@@ -187,8 +316,8 @@ var countDown = (time) =>{
                 title: "Would you want to renew!",
                 inputType: 'number',
                 callback: function (result) {
-                    let value = result == null ? 0: result;
-                    $('#end-timeout').attr('data-value',value);
+                    let value = result == null ? 0 : result;
+                    $('#end-timeout').attr('data-value', value);
                     $('#end-timeout').click();
                 }
             });

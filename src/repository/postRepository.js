@@ -1,5 +1,5 @@
 var Post = require('../models/post');
-
+var User = require('../models/user');
 var PostRepository ={};
 
 PostRepository.findAll = async()=>{
@@ -91,6 +91,7 @@ PostRepository.updateOrCreateBid = async (data) =>{
         return;
     } else{
         let driversInStore = await Post.findOne({'_id':dataStore._id,'bid.driverId': data.driverId});
+        let driver = await User.findById(data.driverId);
         if (driversInStore){
             console.log('driver is valid');
             await Post.update({'_id':dataStore._id,'bid.driverId':data.driverId},{
@@ -106,7 +107,8 @@ PostRepository.updateOrCreateBid = async (data) =>{
         let newBid = {
             driverId: data.driverId,
             awaitTime: data.awaitTime,
-            price: data.price
+            price: data.price,
+            fullName: driver.fullName
         };
         await Post.update({'_id':dataStore._id},{
             $push:{

@@ -16,6 +16,11 @@ UserController.getProfile = async (req, res) => {
     if (dataValid.length > 0) {
         newPostValid = false;
     }
+    dataValid.forEach(x=>x.bid.sort((a,b)=>{
+       if(a.price > b.price) return -1;
+       if(a.price < b.price) return -1;
+       return 0;
+    }));
     //console.log(dataValid);
     res.render("profiles/index", { post: dataValid, newPostValid: newPostValid, user: req.user });
 };

@@ -28,7 +28,8 @@
     <![endif]-->
 
     <!-- Google Font -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
 <!-- ADD THE CLASS layout-top-nav TO REMOVE THE SIDEBAR. -->
 <body class="hold-transition skin-blue layout-top-nav">
@@ -39,7 +40,8 @@
             <div class="container">
                 <div class="navbar-header">
                     <a href="img/2140822-RKJFOMQX-7.jpg" class="navbar-brand"><b>Admin</b>LTE</a>
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#navbar-collapse">
                         <i class="fa fa-bars"></i>
                     </button>
                 </div>
@@ -50,7 +52,8 @@
                         <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
                         <li><a href="#">Link</a></li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span
+                                        class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="#">Action</a></li>
                                 <li><a href="#">Another action</a></li>
@@ -88,7 +91,8 @@
                                             <a href="#">
                                                 <div class="pull-left">
                                                     <!-- User Image -->
-                                                    <img src="img/2140822-RKJFOMQX-7.jpg" class="img-circle" alt="User Image">
+                                                    <img src="img/2140822-RKJFOMQX-7.jpg" class="img-circle"
+                                                         alt="User Image">
                                                 </div>
                                                 <!-- Message title and timestamp -->
                                                 <h4>
@@ -153,7 +157,9 @@
                                                 <!-- The progress bar -->
                                                 <div class="progress xs">
                                                     <!-- Change the css width attribute to simulate progress -->
-                                                    <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                    <div class="progress-bar progress-bar-aqua" style="width: 20%"
+                                                         role="progressbar" aria-valuenow="20" aria-valuemin="0"
+                                                         aria-valuemax="100">
                                                         <span class="sr-only">20% Complete</span>
                                                     </div>
                                                 </div>
@@ -234,72 +240,73 @@
 
                     <!-- Main content -->
                     <section class="content">
-
-                        <div class="box box-danger">
+                        <div class="insert-after"></div>
+                        <% if (dataIndex.length > 0) { %>
+                        <% dataIndex.forEach(x=> { %>
+                        <div class="box box-danger block-post" id="<%= x.post._id%>">
                             <div class="box-header ui-sortable-handle" style="cursor: move;">
                                 <div class="box-tools pull-right" data-toggle="tooltip" title="Status">
                                     <i class="fa fa-comments-o"></i>
-                                    <h3 class="box-title">Chat</h3>
+                                    <h3 class="box-title">Book Bike</h3>
                                 </div>
                             </div>
                             <div class="box-body">
+
                                 <div class="user-block">
-                                    <img class="img-circle img-bordered-sm" src="img/2140822-RKJFOMQX-7.jpg" alt="user image">
+                                    <img class="img-circle img-bordered-sm" src="<%= x.poster.picture %>" alt="<%= x.poster.fullName %>">
                                     <span class="username">
-                    <a href="#">Jonathan Burke Jr.</a>
-                  </span>
-                                    <span class="description">Shared publicly - 7:30 PM today</span>
+                                        <a href="#"><%= x.poster.fullName%></a>
+                                    </span>
+                                    <span class="description"><%= x.post.createAt%></span>
                                 </div>
-                                <!-- /.user-block -->
-                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px"><i class="fa fa-motorcycle" aria-hidden="true"></i>
+
+                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
+                                    <i class="fa fa-motorcycle" aria-hidden="true"></i>
                                     </i>&nbsp;&nbsp;Lộ trình</p>
                                 <table class="table">
                                     <tbody>
                                     <tr style="text-align: center;">
                                         <td>
-                        <span><i class="fa fa-map-marker" aria-hidden="true"></i>
-                          <b>Điểm đi</b>
-                        </span>
+                                            <span><i class="fa fa-map-marker" aria-hidden="true"></i>
+                                              <b>Điểm đi</b>
+                                          </span>
                                         </td>
                                         <td><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></td>
                                         <td>
-                        <span><i class="fa fa-map-marker" aria-hidden="true"></i>
-                          <b>Điểm đến</b>
-                        </span>
+                                            <span><i class="fa fa-map-marker" aria-hidden="true"></i>
+                                               <b>Điểm đến</b>
+                                           </span>
                                         </td>
                                     </tr>
                                     <tr style="text-align: center;">
-
-                                        <td>Hà Đông</td>
+                                        <td><%= x.post.location%></td>
                                         <td></td>
-                                        <td>
-                                            Cầu giấy
-                                        </td>
+                                        <td><%= x.post.destination %></td>
                                     </tr>
                                     </tbody>
                                 </table>
-                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px"><i class="fa fa-usd" aria-hidden="true"></i>
-
+                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
+                                    <i class="fa fa-usd" aria-hidden="true"></i>
                                     </i>&nbsp;&nbsp;Giá</p>
                                 <table class="table">
                                     <tbody>
                                     <tr style="text-align: center;">
                                         <td>
-                        <span><i class="fa fa-money" aria-hidden="true"></i></i>
-                            <b>Best BID</b>
-                        </span>
+                                            <span><i class="fa fa-money" aria-hidden="true"></i></i>
+                                                <b>Best BID</b>
+                                            </span>
                                         </td>
                                         <td>
                                             <i class="fa fa-arrows-h"></i>
                                         </td>
                                         <td>
-                        <span><i class="fa fa-gg" aria-hidden="true"></i>
-                          <b>Đơn vị</b></span>
+                                            <span><i class="fa fa-gg" aria-hidden="true"></i>
+                                              <b>Đơn vị</b></span>
                                         </td>
                                     </tr>
                                     <tr style="text-align: center;">
                                         <td>
-                                            <span class="badge bg-green">53.000</span>
+                                            <span class="badge bg-green"><%= x.bestPrice %></span>
                                         </td>
                                         <td>
                                         </td>
@@ -309,35 +316,33 @@
                                     </tr>
                                     </tbody>
                                 </table>
-
-                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px"><i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thông tin tập trung</p>
-                                <p class="trip-info">the coast of the Semantics, a large language ocean.
-                                    A small river named Duden flows by their place and supplies
-                                    it with the necessary regelialia. It is a paradisematic
-                                    country, in which roasted parts of sentences fly into
-                                    your mouth.</p>
+                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thông tin tập trung
+                                </p>
+                                <p class="trip-info"><%= x.post.status %></p>
                                 <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
                                     <i class="fa fa-clock-o" aria-hidden="true"></i> Thời gian còn lại
                                 </p>
-                                <span class="badge bg-red count-downs-expiredTime" data-await-time="a">
-                    1212
-                  </span>
+                                <span class="badge bg-red count-downs-expiredTime" data-await-time="post.expiredTime"></span>
+
                             </div>
                             <div class="box-footer">
-                                <label for="inputEmail3" class="col-sm-2 control-label">BID</label>
+                                <label for="driver-bid" class="col-sm-2 control-label">BID</label>
                                 <div class="col-sm-2">
-                                    <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+                                    <input type="number" class="form-control driver-bid" placeholder="BID" value="<%= x.driverBid.price%>">
                                 </div>
 
-                                <label for="inputEmail3" class="col-sm-2 control-label">Thời gian tới</label>
+                                <label for="driver-arrival-time" class="col-sm-2 control-label">Thời gian tới</label>
                                 <div class="col-sm-2">
-                                    <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+                                    <input type="number" class="form-control driver-arrival-time" placeholder="Phút">
                                 </div>
                                 <div class="col-sm-3">
-                                    <a type="submit" class="btn btn-danger pull-right btn-block btn-sm">Send</a>
+                                    <a type="submit" class="btn btn-danger pull-right btn-block btn-sm send-bid">Send</a>
                                 </div>
                             </div>
                         </div>
+                        <% }) %>
+                        <% } %>
                     </section>
                     <!-- /.content -->
                 </div>
@@ -353,9 +358,11 @@
                                 <h3 class="box-title">Latest Orders</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                                class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i
+                                                class="fa fa-times"></i></button>
                                 </div>
                             </div>
                             <!-- /.box-header -->
@@ -419,8 +426,10 @@
                             </div>
                             <!-- /.box-body -->
                             <div class="box-footer clearfix">
-                                <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Place New Order</a>
-                                <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All Orders</a>
+                                <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Place New
+                                    Order</a>
+                                <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All
+                                    Orders</a>
                             </div>
                             <!-- /.box-footer -->
                         </div>
@@ -451,5 +460,11 @@
 <script src="/javascripts/profilejs/adminlte.min.js"></script>
 <script src="/vendor/bootbox/bootbox.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/driverjs/index.js"></script>
+<script>
+    $(document).ready(function (evt) {
+        bidSocket.driverSocket();
+    });
+</script>
 </body>
 </html>

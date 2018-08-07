@@ -67,6 +67,7 @@ var processEvent = (io) =>{
                }
                await postRepository.updateStatus({'id':data.postId,'status':data.newStatus});
                socket.emit("success_change_status",data);
+               socket.broadcast.emit('status_to_driver',data);
            }
         });
 
@@ -113,15 +114,14 @@ var processEvent = (io) =>{
                         driverId: userId,
                         price: data.bid,
                         awaitTime: arrivalTime
-                    }
+                    };
 
                     await postRepository.updateOrCreateBid(newData);
 
                     let posts = await postRepository.findById(data.postId);
                     let bidColl = posts.bid.sort(sortBID);
-                    console.log('BID Sort'+bidColl);
                     socket.emit('driverIndexSuccess',{message:'BID success',bid: data});
-                    socket.broadcast.to(posts.userId+"_private").emit('driverBid',{ 'allBid': bidColl});
+                    socket.broadcast.to(posts.userId+"_private").emit('driverBidToUser',{ 'allBid': bidColl});
                 }
             } catch(e){
                 socket.emit('driverIndexError', {message: e.message});

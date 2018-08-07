@@ -272,7 +272,7 @@
             <section class="content-heade no-padding">
                 <div class="box box-widget widget-user">
                     <!-- Add the bg color to the header using any of the bg-* classes -->
-                    <div class="widget-user-header bg-black" style="background: url('img/aziz-acharki-253909-unsplash.jpg') center center; height: 300px;">
+                    <div class="widget-user-header bg-black" style="background: url('/images/bg-01.jpg') center center; height: 300px;">
                         <h3 class="widget-user-username">Elizabeth Pierce</h3>
                         <h5 class="widget-user-desc">Web Designer</h5>
                     </div>
@@ -333,195 +333,197 @@
                                         style="display: none"
                                         <% } %>
                                             >
-                                            <div class="col-md-8" id="post-book-bike">
-                                                <div class="box box-success">
-                                                    <div class="box-header ui-sortable-handle" style="cursor: move;">
-                                                        <div class="box-tools pull-right" data-toggle="tooltip" title="Status">
-                                                            <i class="fa fa-comments-o"></i>
-                                                            <h3 class="box-title">Book Bike</h3>
+                                        <% if (post.length > 0){ %>
+                                            <% post.forEach(x=> { %>
+                                                <div class="col-md-8" id="post-book-bike">
+                                                    <div class="box box-success">
+                                                        <div class="box-header ui-sortable-handle" style="cursor: move;">
+                                                            <div class="box-tools pull-right" data-toggle="tooltip" title="Status">
+                                                                <i class="fa fa-comments-o"></i>
+                                                                <h3 class="box-title">Book Bike</h3>
+                                                            </div>
+                                                        </div>
+                                                        <div class="box-body">
+
+                                                                    <input id="id_post" type="hidden" value="<%= x._id%>" />
+                                                                    <div class="user-block">
+                                                                        <img class="img-circle img-bordered-sm" src="<%= user.picture %>" alt="user image">
+                                                                        <span class="username">
+                                                                            <a href="#">
+                                                                                <%= user.fullName %>
+                                                                            </a>
+                                                                        </span>
+                                                                        <span class="description">
+                                                                            <%= user.createAt %>
+                                                                        </span>
+                                                                    </div>
+                                                                    <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
+                                                                        <i class="fa fa-motorcycle" aria-hidden="true"></i>
+                                                                        </i>&nbsp;&nbsp;Lộ trình</p>
+                                                                    <table class="table">
+                                                                        <tbody>
+                                                                            <tr style="text-align: center;">
+                                                                                <td>
+                                                                                    <span>
+                                                                                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                                                                                        <b>Điểm đi</b>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <span>
+                                                                                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                                                                                        <b>Điểm đến</b>
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr style="text-align: center;">
+
+                                                                                <td>
+                                                                                    <%= x.location%>
+                                                                                </td>
+                                                                                <td></td>
+                                                                                <td>
+                                                                                    <%=  x.destination%>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
+                                                                        <i class="fa fa-usd" aria-hidden="true"></i>
+
+                                                                        </i>&nbsp;&nbsp;Giá</p>
+                                                                    <table class="table">
+                                                                        <tbody>
+                                                                            <tr style="text-align: center;">
+                                                                                <td>
+                                                                                    <span>
+                                                                                        <i class="fa fa-money" aria-hidden="true"></i>
+                                                                                        </i>
+                                                                                        <b>Nhà quản lí đề xuất</b>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <span>
+                                                                                        <i class="fa fa-gg" aria-hidden="true"></i>
+                                                                                        <b>Đơn vị</b>
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr style="text-align: center;">
+                                                                                <td>
+                                                                                    <span class="badge bg-green">
+                                                                                        <%= x.init_money %>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <span class="badge bg-danger">VNĐ</span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+
+                                                                    <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
+
+                                                                        <i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thôngtin tập trung</p>
+                                                                    <p class="trip-info">
+                                                                        <%= x.status%>
+                                                                    </p>
+                                                                    <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
+
+                                                                        <i class="fa fa-times-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thời gian đấu
+                                                                        <giá></giá> còn lại</p>
+                                                                    <span class="badge bg-red" id="count-downs" data-await-time="<%= x.expiredTime%>"></span>
+
+                                                        </div>
+                                                        <span hidden="hidden" id="end-timeout"></span>
+                                                    </div>
+                                                    <div class="box-footer">
+                                                        <div class="input-group">
+                                                            <input class="form-control" placeholder="Type message...">
+
+                                                            <div class="input-group-btn">
+                                                                <button type="button" class="btn btn-success" id="add-new-status">
+                                                                    <i class="fa fa-plus"></i>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="box-body">
-                                                        <% if (post.length > 0){ %>
-                                                            <% post.forEach(x=> { %>
-                                                                <input id="id_post" type="hidden" value="<%= x._id%>" />
-                                                                <div class="user-block">
-                                                                    <img class="img-circle img-bordered-sm" src="<%= user.picture %>" alt="user image">
-                                                                    <span class="username">
-                                                                        <a href="#">
-                                                                            <%= user.fullName %>
-                                                                        </a>
-                                                                    </span>
-                                                                    <span class="description">
-                                                                        <%= user.createAt %>
-                                                                    </span>
-                                                                </div>
-                                                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
-                                                                    <i class="fa fa-motorcycle" aria-hidden="true"></i>
-                                                                    </i>&nbsp;&nbsp;Lộ trình</p>
-                                                                <table class="table">
-                                                                    <tbody>
-                                                                        <tr style="text-align: center;">
-                                                                            <td>
-                                                                                <span>
-                                                                                    <i class="fa fa-map-marker" aria-hidden="true"></i>
-                                                                                    <b>Điểm đi</b>
-                                                                                </span>
-                                                                            </td>
-                                                                            <td>
-                                                                                <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
-                                                                            </td>
-                                                                            <td>
-                                                                                <span>
-                                                                                    <i class="fa fa-map-marker" aria-hidden="true"></i>
-                                                                                    <b>Điểm đến</b>
-                                                                                </span>
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr style="text-align: center;">
-
-                                                                            <td>
-                                                                                <%= x.location%>
-                                                                            </td>
-                                                                            <td></td>
-                                                                            <td>
-                                                                                <%=  x.destination%>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
-                                                                    <i class="fa fa-usd" aria-hidden="true"></i>
-
-                                                                    </i>&nbsp;&nbsp;Giá</p>
-                                                                <table class="table">
-                                                                    <tbody>
-                                                                        <tr style="text-align: center;">
-                                                                            <td>
-                                                                                <span>
-                                                                                    <i class="fa fa-money" aria-hidden="true"></i>
-                                                                                    </i>
-                                                                                    <b>Nhà quản lí đề xuất</b>
-                                                                                </span>
-                                                                            </td>
-                                                                            <td>
-                                                                                <span>
-                                                                                    <i class="fa fa-gg" aria-hidden="true"></i>
-                                                                                    <b>Đơn vị</b>
-                                                                                </span>
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr style="text-align: center;">
-                                                                            <td>
-                                                                                <span class="badge bg-green">
-                                                                                    <%= x.init_money %>
-                                                                                </span>
-                                                                            </td>
-                                                                            <td>
-                                                                                <span class="badge bg-danger">VNĐ</span>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-
-                                                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
-
-                                                                    <i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thôngtin tập trung</p>
-                                                                <p class="trip-info">
-                                                                    <%= x.status%>
-                                                                </p>
-                                                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
-
-                                                                    <i class="fa fa-times-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thời gian đấu
-                                                                    <giá></giá> còn lại</p>
-                                                                <span class="badge bg-red" id="count-downs" data-await-time="<%= x.expiredTime%>"></span>
-                                                                <% }) %>
-                                                                    <% } %>
-                                                    </div>
-                                                    <span hidden="hidden" id="end-timeout"></span>
                                                 </div>
-                                                <div class="box-footer">
-                                                    <div class="input-group">
-                                                        <input class="form-control" placeholder="Type message...">
+                                                <div class="col-md-4">
+                                                    <div class="box" id="list-driver-bid">
+                                                         <!--/.box-header -->
+                                                        <div class="box-body no-padding">
+                                                            <table class="table table-striped">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <th style="width: 10px">#</th>
+                                                                        <th>Tên tài xế</th>
+                                                                        <th>Giá tiền</th>
+                                                                        <th style="width: 40px">Gời đón</th>
+                                                                    </tr>
+                                                                    <% if(x.bid.length >0 ){%>
+                                                                        <tr>
+                                                                            <td>0</td>
+                                                                            <td><%= x.bid[0].fullName%></td>
+                                                                            <td>
+                                                                                <span class="badge bg-red"><%= x.bid[0].price%> VNĐ</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span class="badge bg-red arrivalTime" data-bind="<%= x.bid[0].awaitTime%>"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <%}%>
+                                                                    <% if(x.bid.length > 1 ){%>
+                                                                        <tr>
+                                                                            <td>1</td>
+                                                                            <td><%= x.bid[1].fullName%></td>
+                                                                            <td>
+                                                                                <span class="badge bg-warning"><%= x.bid[1].price%> VNĐ</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span class="badge bg-warning arrivalTime" data-bind="<%= x.bid[1].awaitTime%>"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <%}%>
+                                                                    <% if(x.bid.length >2 ){%>
+                                                                        <tr>
+                                                                            <td>1</td>
+                                                                            <td><%= x.bid[2].fullName%></td>
+                                                                            <td>
+                                                                                <span class="badge bg-aqua"><%= x.bid[2].price%> VNĐ</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span class="badge bg-aqua arrivalTime" data-bind="<%= x.bid[2].awaitTime%>"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <%}%>
+                                                                    <% if(x.bid.length > 3 ){%>
+                                                                        <% for(var l=3; l<x.bid.length; l++) {%>
 
-                                                        <div class="input-group-btn">
-                                                            <button type="button" class="btn btn-success" id="add-new-status">
-                                                                <i class="fa fa-plus"></i>
-                                                            </button>
+                                                                            <tr>
+                                                                                <td><%= l%></td>
+                                                                                <td><%= x.bid[l].fullName%></td>
+                                                                                <td>
+                                                                                    <span class="badge bg-gray"><%= x.bid[l].price%> VNĐ</span>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <span class="badge bg-gray arrivalTime" data-bind="<%= x.bid[l].awaitTime%>"></span>
+                                                                                </td>
+                                                                            </tr>
+
+                                                                        <% } %>
+                                                                    <%}%>
+                                                                </tbody>
+                                                            </table>
                                                         </div>
+                                                         <!--/.box-body -->
                                                     </div>
                                                 </div>
-
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="box">
-                                                    <div class="box-header">
-                                                        <h3 class="box-title">Striped Full Width Table</h3>
-                                                    </div>
-                                                    <!-- /.box-header -->
-                                                    <div class="box-body no-padding">
-                                                        <table class="table table-striped">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <th style="width: 10px">#</th>
-                                                                    <th>Task</th>
-                                                                    <th>Progress</th>
-                                                                    <th style="width: 40px">Label</th>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>1.</td>
-                                                                    <td>Update software</td>
-                                                                    <td>
-                                                                        <div class="progress progress-xs">
-                                                                            <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <span class="badge bg-red">55%</span>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>2.</td>
-                                                                    <td>Clean database</td>
-                                                                    <td>
-                                                                        <div class="progress progress-xs">
-                                                                            <div class="progress-bar progress-bar-yellow" style="width: 70%"></div>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <span class="badge bg-yellow">70%</span>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>3.</td>
-                                                                    <td>Cron job running</td>
-                                                                    <td>
-                                                                        <div class="progress progress-xs progress-striped active">
-                                                                            <div class="progress-bar progress-bar-primary" style="width: 30%"></div>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <span class="badge bg-light-blue">30%</span>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>4.</td>
-                                                                    <td>Fix and squish bugs</td>
-                                                                    <td>
-                                                                        <div class="progress progress-xs progress-striped active">
-                                                                            <div class="progress-bar progress-bar-success" style="width: 90%"></div>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <span class="badge bg-green">90%</span>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                    <!-- /.box-body -->
-                                                </div>
-                                            </div>
+                                            <% }) %>
+                                        <% } %>
                                     </div>
                                 </div>
                                 <!-- /.tab-pane -->

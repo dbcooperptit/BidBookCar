@@ -29,6 +29,7 @@ var PostSchema =new mongoose.Schema({
     },
     bid: {
         type:[{
+            fullName:String,
             driverId: String,
             price: Number,
             awaitTime: Date

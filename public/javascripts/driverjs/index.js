@@ -24,6 +24,9 @@ let bidSocket = {
             });
         });
 
+        socket.on('status_to_driver',data =>{
+            $('.trip-info').text(data.newStatus);
+        });
         socket.on('driverIndexSuccess',data =>{
             console.log(data);
         })
@@ -119,6 +122,7 @@ let showPost = (post) =>{
 let showBlockPost = (data) =>{
     let userHtml = showUser(data.user);
     let postHtml = showPost(data.newPost);
+    console.log('New Post: '+data.newPost._id);
     let html = '<div class="box box-danger block-post" id="'+data.newPost._id+'">\n' +
         '    <div class="box-header ui-sortable-handle" style="cursor: move;">\n' +
         '        <div class="box-tools pull-right" data-toggle="tooltip" title="Status">\n' +
