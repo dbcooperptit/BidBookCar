@@ -87,6 +87,40 @@ var bidSocket = {
             console.log(data);
             displayListBid(data.allBid);
         });
+
+        socket.on('chooseDriversToUser', data=>{
+            dispalyModalBody(data);
+            countDownProcessDeal(10);
+        });
+
+        $('#modal-info').on('click','.confirm_choose_bid',function(evt){
+            let postId= $(this).attr('data-postId');
+            let price= $(this).attr('data-price');
+            let driverId= $(this).attr('data-driverId');
+
+            let data = {
+                postId: postId,
+                bestPirceChoose: price,
+                driverId: driverId
+            };
+
+            socket.emit('userConfirm',data);
+        });
+
+        socket.on('deal_build_error',data =>{
+            $('#modal-info').modal('hide');
+            bootbox.alert({
+                message: data.message,
+                size: 'small'
+            });
+        });
+        socket.on('deal_build_success',data=>{
+            $('#modal-info').modal('hide');
+            bootbox.alert({
+                message: data.message,
+                size: 'small'
+            });
+        });
         socket.on('reconnect', () => {
             location.reload();
         });
@@ -287,6 +321,42 @@ var trListBid = (data) => {
     return html;
 };
 
+var dispalyModalBody = (data) =>{
+    $('#modal-info').modal('show');
+    var html = '<div class="box box-widget widget-user">\n' +
+        '                                <!-- Add the bg color to the header using any of the bg-* classes -->\n' +
+        '                                <div class="widget-user-header bg-aqua-active">\n' +
+        '                                    <h3 class="widget-user-username">'+data.driverInfo.fullName+'</h3>\n' +
+        '                                    <h5 class="widget-user-desc">BIKER</h5>\n' +
+        '                                </div>\n' +
+        '                                <div class="widget-user-image">\n' +
+        '                                    <img class="img-circle" src="'+data.driverInfo.picture+'" alt="'+data.driverInfo.fullName+'">\n' +
+        '                                </div>\n' +
+        '                                <div class="box-footer">\n' +
+        '                                    <div class="row">\n' +
+        '                                        <div class="col-sm-4 border-right">\n' +
+        '\n' +
+        '                                        </div>\n' +
+        '                                        <!-- /.col -->\n' +
+        '                                        <div class="col-sm-4 border-right">\n' +
+        '                                           <div class="description-block">\n' +
+        '                                               <h5 class="description-header" style="color: #0c0c0c;">Thời gian giao dịch còn lại</h5>\n' +
+        '<span class="time-deal badge badge-danger"></span>'+
+        '                                            </div>\n' +
+        '                                        </div>\n' +
+        '                                        <!-- /.col -->\n' +
+        '                                        <div class="col-sm-4 border-right">\n' +
+        '                                             <a class="btn btn-success confirm_choose_bid" data-postId="'+data.postId+'" data-price="'+data.bestPirceChoose+'" data-driverId="'+data.driverInfo._id+'">Chọn tài xế</a>\n' +
+        '                                        </div>\n' +
+        '                                        <!-- /.col -->\n' +
+        '                                    </div>\n' +
+        '                                    <!-- /.row -->\n' +
+        '                                </div>\n' +
+        '                            </div>'
+
+    $('#modal-info .modal-body').html(html);
+}
+
 var localDateTime = (time) =>{
     let convertTime = new Date(time);
     return convertTime.toLocaleTimeString();
@@ -324,4 +394,15 @@ var countDown = (time) => {
         }
     }, 1000);
 
+};
+
+let countDownProcessDeal = (time) =>{
+    let x = setInterval(()=>{
+        time = time-1;
+        $('#modal-info').find('.time-deal').text(time+' s');
+        if (time<0){
+            clearInterval(x);
+            $('#modal-info').modal('hide');
+        }
+    },1000)
 };

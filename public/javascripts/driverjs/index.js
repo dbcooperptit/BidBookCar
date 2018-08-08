@@ -4,19 +4,19 @@ let bidSocket = {
         socket.on('connect', () => {
             socket.emit('init_channel');
         });
-        $('.content').on('click','.send-bid', function(evt){
+        $('.content').on('click', '.send-bid', function (evt) {
             var post = $(this).closest('.block-post');
             var postId = $(post).attr('id');
             let bid = $(post).find('.driver-bid').val();
             let arrivalTime = $(post).find('.driver-arrival-time').val();
-            socket.emit('driverBid',{postId: postId, bid: bid, arrivalTime:arrivalTime});
+            socket.emit('driverBid', {postId: postId, bid: bid, arrivalTime: arrivalTime});
         });
-        socket.on("driverIndexNewPost",data =>{
+        socket.on("driverIndexNewPost", data => {
             console.log(data);
             showBlockPost(data);
         });
 
-        socket.on('driverIndexError',data =>{
+        socket.on('driverIndexError', data => {
             console.log(data);
             bootbox.alert({
                 message: data.message,
@@ -24,42 +24,82 @@ let bidSocket = {
             });
         });
 
-        socket.on('status_to_driver',data =>{
+        socket.on('status_to_driver', data => {
             $('.trip-info').text(data.newStatus);
         });
 
-        socket.on('driverIndexSuccess',data =>{
+        socket.on('driverIndexSuccess', data => {
             console.log(data);
         });
 
-        socket.on('adjourn_to_drivers',data =>{
+        socket.on('adjourn_to_drivers', data => {
             console.log(data)
-           if (!data.isHidden){
-               let postId = data.postId;
-               $('#'+postId).css('display','block');
-
-               $('#'+postId).find('.count-downs-expiredTime').attr('data-await-time',data.expiredTime);
-               countDownsBlock(postId);
-           };
+            if (!data.isHidden) {
+                let postId = data.postId;
+                $('#' + postId).css('display', 'block');
+                $('#' + postId).find('.count-downs-expiredTime').attr('data-await-time', data.expiredTime);
+                countDownsBlock(postId);
+            }
+            ;
         });
+
+        socket.on('chooseUserToDriver', data => {
+            console.log(data);
+            $('#modal-info').modal('show');
+            showChooseModal(data);
+            showFooterModal(data);
+            countDownProcessDeal(10)
+        });
+
+        $('#modal-info').on('click','.confirm_choose_bid',function (evt) {
+            let postId= $(this).attr('data-postId');
+            let price= $(this).attr('data-price');
+            let userId= $(this).attr('data-userId');
+
+            let data = {
+                postId: postId,
+                bestPirceChoose: price,
+                userId: userId
+            };
+
+            socket.emit('driverConfirm',data);
+        });
+
+        socket.on('deal_build_success',data=>{
+            $('#modal-info').modal('hide');
+            bootbox.alert({
+                message: data.message,
+                size: 'small'
+            });
+        });
+
+        $('#modal-info').on('click','.not_choose_poster',function (evt) {
+            socket.emit('decline_customer');
+        })
+
+        socket.on('decline_customer_success',data =>{
+            if (data.message ==='success'){
+                $('#modal-info').modal('hide');
+            }
+        })
     }
 
 };
 
 let showUser = (user) => {
     let html = '<div class="user-block">\n' +
-        '                                    <img class="img-circle img-bordered-sm" src="'+user.picture+'"\n' +
-        '                                         alt="'+user.fullName+'">\n' +
+        '                                    <img class="img-circle img-bordered-sm" src="' + user.picture + '"\n' +
+        '                                         alt="' + user.fullName + '">\n' +
         '                                    <span class="username">\n' +
-        '                    <a href="#">'+user.fullName+'</a>\n' +
+        '                    <a href="#">' + user.fullName + '</a>\n' +
         '                  </span>\n' +
-        '                                    <span class="description">'+user.createAt+'</span>\n' +
+        '                                    <span class="description">' + user.createAt + '</span>\n' +
         '                                </div>'
 
     return html;
 };
 
-let showPost = (post) =>{
+let showPost = (post) => {
     let html = '<p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">\n' +
         '                                    <i class="fa fa-motorcycle" aria-hidden="true"></i>\n' +
         '                                    </i>&nbsp;&nbsp;Lộ trình</p>\n' +
@@ -80,9 +120,9 @@ let showPost = (post) =>{
         '                                    </tr>\n' +
         '                                    <tr style="text-align: center;">\n' +
         '\n' +
-        '                                        <td>'+post.location+'</td>\n' +
+        '                                        <td>' + post.location + '</td>\n' +
         '                                        <td></td>\n' +
-        '                                        <td>'+post.destination+'</td>\n' +
+        '                                        <td>' + post.destination + '</td>\n' +
         '                                    </tr>\n' +
         '                                    </tbody>\n' +
         '                                </table>\n' +
@@ -108,7 +148,7 @@ let showPost = (post) =>{
         '                                    </tr>\n' +
         '                                    <tr style="text-align: center;">\n' +
         '                                        <td>\n' +
-        '                                            <span class="badge bg-green">'+post.price+'</span>\n' +
+        '                                            <span class="badge bg-green">' + post.price + '</span>\n' +
         '                                        </td>\n' +
         '                                        <td>\n' +
         '                                        </td>\n' +
@@ -122,20 +162,20 @@ let showPost = (post) =>{
         '                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">\n' +
         '                                    <i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;&nbsp;Thông tin tập trung\n' +
         '                                </p>\n' +
-        '                                <p class="trip-info">'+post.status+'</p>\n' +
+        '                                <p class="trip-info">' + post.status + '</p>\n' +
         '                                <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">\n' +
         '                                    <i class="fa fa-clock-o" aria-hidden="true"></i> Thời gian còn lại\n' +
         '                                </p>\n' +
-        '                                <span class="badge bg-red count-downs-expiredTime" data-await-time="'+post.expiredTime+'"></span>'
+        '                                <span class="badge bg-red count-downs-expiredTime" data-await-time="' + post.expiredTime + '"></span>'
 
     return html;
 };
 
-let showBlockPost = (data) =>{
+let showBlockPost = (data) => {
     let userHtml = showUser(data.user);
     let postHtml = showPost(data.newPost);
-    console.log('New Post: '+data.newPost._id);
-    let html = '<div class="box box-danger block-post" id="'+data.newPost._id+'">\n' +
+    console.log('New Post: ' + data.newPost._id);
+    let html = '<div class="box box-danger block-post" id="' + data.newPost._id + '">\n' +
         '    <div class="box-header ui-sortable-handle" style="cursor: move;">\n' +
         '        <div class="box-tools pull-right" data-toggle="tooltip" title="Status">\n' +
         '            <i class="fa fa-comments-o"></i>\n' +
@@ -143,8 +183,8 @@ let showBlockPost = (data) =>{
         '        </div>\n' +
         '    </div>\n' +
         '    <div class="box-body">\n' +
-                userHtml+
-                postHtml+
+        userHtml +
+        postHtml +
         '    </div>\n' +
         '    <div class="box-footer">\n' +
         '        <label for="driver-bid" class="col-sm-2 control-label">BID</label>\n' +
@@ -166,12 +206,70 @@ let showBlockPost = (data) =>{
 
 };
 
-let countDownsBlock = (idPost) =>{
-  let expiredTime = $('#'+idPost).find('.count-downs-expiredTime').attr('data-await-time');
-  var countDownDate = new Date(expiredTime ).getTime();
+let showChooseModal = (data) => {
+
+    let html = '<div class="table-responsive">\n' +
+        '<table class="table no-margin">\n' +
+        ' <thead>\n' +
+        '<tr>\n' +
+        '<th style="text-align:center;">Mục</th>\n' +
+        '<th style="text-align:center;">Chi tiết</th>\n' +
+        '</tr>\n' +
+        '</thead>\n' +
+        '<tbody>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Điểm đi</td>\n' +
+        '<td style="text-align:center;">'+data.postInfo.location+'</td>\n' +
+        '</tr>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Điểm đến</td>\n' +
+        '<td style="text-align:center;">'+data.postInfo.destination+'</td>\n' +
+        '</tr>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Giá</td>\n' +
+        '<td style="text-align:center;">'+data.bestPirceChoose+'</td>         \n' +
+        '</tr>\n' +
+        '</tbody>\n' +
+        '</table>\n' +
+        '</div>';
+
+    $('#modal-info .modal-body').html(html);
+};
+
+let showFooterModal = (data) =>{
+    let html = ' <div class="row">\n' +
+        '                <div class="col-sm-4 border-right">\n' +
+        '                  <div class="description-block">\n' +
+        '                    <a class="btn btn-danger not_choose_poster">Hủy</a>\n' +
+        '                  </div>\n' +
+        '                  <!-- /.description-block -->\n' +
+        '                </div>\n' +
+        '                <!-- /.col -->\n' +
+        '                <div class="col-sm-4 border-right">\n' +
+        '                  <div class="description-block">\n' +
+        '                    <h5 class="description-header">Thời gian giao dịch còn lại</h5>\n' +
+        '                    <span class="badge badge-danger time-deal"></span>'+
+        '                  </div>\n' +
+        '                  <!-- /.description-block -->\n' +
+        '                </div>\n' +
+        '                <!-- /.col -->\n' +
+        '                <div class="col-sm-4">\n' +
+        '                  <div class="description-block">\n' +
+        '                    <a class="class btn btn-success confirm_choose_bid" data-postId="'+data.postInfo._id+'" data-price="'+data.bestPirceChoose+'" data-userId="'+data.userId+'">Đi chuyến này</a>\n' +
+        '                  </div>\n' +
+        '                  <!-- /.description-block -->\n' +
+        '                </div>\n' +
+        '                <!-- /.col -->\n' +
+        '              </div>';
+    $('#modal-info .modal-footer').html(html);
+};
+
+let countDownsBlock = (idPost) => {
+    let expiredTime = $('#' + idPost).find('.count-downs-expiredTime').attr('data-await-time');
+    var countDownDate = new Date(expiredTime).getTime();
 
 // Update the count down every 1 second
-    var x = setInterval(function() {
+    var x = setInterval(function () {
 
         var now = new Date().getTime();
 
@@ -183,12 +281,23 @@ let countDownsBlock = (idPost) =>{
 
         // Display the result in the element with id="demo"
         //document.getElementById("count-downs").innerHTML = minutes + "m " + seconds + "s ";
-        $('#'+idPost).find('.count-downs-expiredTime').text( minutes + "m " + seconds + "s ");
+        $('#' + idPost).find('.count-downs-expiredTime').text(minutes + "m " + seconds + "s ");
         // If the count down is finished, write some text
         if (distance < 0) {
             clearInterval(x);
-            $('#'+idPost).css('display','none');
+            $('#' + idPost).css('display', 'none');
             console.log('expired');
         }
     }, 1000);
+};
+
+let countDownProcessDeal = (time) =>{
+    let x = setInterval(()=>{
+        time = time-1;
+        $('#modal-info').find('.time-deal').text(time+' s');
+        if (time<0){
+            clearInterval(x);
+            $('#modal-info').modal('hide');
+        }
+    },1000)
 };

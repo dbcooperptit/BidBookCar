@@ -1,9 +1,17 @@
 var config 	= require('../config');
 var redis 	= require('redis').createClient;
+var storeRedis = require('redis');
 var adapter = require('socket.io-redis');
 var Post = require("../models/post");
 var postRepository = require("../repository/postRepository");
 var userRepository = require("../repository/userRepository");
+var confirmData = require('../models/confirmtemp');
+var orderRepository = require('../repository/orderRepository');
+//driver activity
+// 0: đang rảnh.
+// 1: đang bận.
+let client = '';
+let redis_key = config.redis_key.key_1;
 var processEvent = (io) =>{
     io.of("/bidchannel").on('connection',socket => {
         socket.on('init_channel',async () =>{
@@ -13,8 +21,18 @@ var processEvent = (io) =>{
             }
 
             let userId = socket.request.session.passport.user;
+            let userStore = await userRepository.findById(userId);
             let privateChannel = userId+"_private";
             socket.join(privateChannel);
+
+            if (userStore.role === 'driver'){
+                let driverStatus = {
+                    driverId: userId,
+                    status:0
+                }
+                client.sadd(redis_key,JSON.stringify(driverStatus));
+            }
+
             console.log('userId: '+userId);
         });
 
@@ -73,6 +91,7 @@ var processEvent = (io) =>{
 
         socket.on('adjourn_post',async data =>{
             let postId = data.postId;
+            let userId = socket.request.session.passport.user;
             let postStore = await postRepository.findById(postId);
             if (!postStore){
                 socket.emit('error_change_status',{message: 'Post already exist'});
@@ -93,6 +112,32 @@ var processEvent = (io) =>{
                 }
                 socket.emit('success_adjourn',{'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden});
                 socket.broadcast.emit('adjourn_to_drivers',{'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden})
+
+                if (isHidden){
+                    let filterDriver =await findDriver(postId);
+                    client.smembers(redis_key,async (err,replies) =>{
+                        if (err) throw err;
+                        var dataStore = replies.map(x=> JSON.parse(x));
+
+                        let driverInvalid =  filterDriver.filter(x=> {
+                            let k =  false;
+                            dataStore.forEach(ds=> {
+                                k = ds.id===x.id && ds.status===0;
+                            });
+                            return k;
+                        }).sort((a,b)=>{ return a.price-b.price; });
+
+                        if (driverInvalid.length <1){
+                            return;
+                        }
+
+                        let chooseDriver = driverInvalid[0];
+                        let driverInfo = await userRepository.findById(chooseDriver.driverId);
+                        let postInfo = await postRepository.findById(postId);
+                        socket.broadcast.to(chooseDriver.driverId+"_private").emit('chooseUserToDriver',{'postInfo':postInfo,'userId':userId,"bestPirceChoose":chooseDriver.price});
+                        socket.emit('chooseDriversToUser',{'postId':postId,'driverInfo':driverInfo,"bestPirceChoose":chooseDriver.price});
+                    });
+                }
             }
         });
 
@@ -127,13 +172,154 @@ var processEvent = (io) =>{
                 socket.emit('driverIndexError', {message: e.message});
             }
         });
+
+        socket.on('userConfirm',async data =>{
+            if ( !socket.request.session.passport){
+                return;
+            }
+            let userId = socket.request.session.passport.user;
+            let bestPirceChoose = data.bestPirceChoose;
+            let postId = data.postId;
+            let driverId = data.driverId;
+
+            let dataInvalid = await confirmData.findOne({'driverId':driverId,'postId':postId});
+            console.log('userConfirm Data Confirm Store: '+dataInvalid);
+            //Nếu dữ liệu chưa tồn tại
+            if (!dataInvalid){
+                console.log('Data Confirm Store: false');
+                let confirm = new confirmData({
+                    postId:postId,
+                    userId:userId
+                });
+                await confirm.save({_id:false});
+                let confirmId = confirm._id;
+                updateDriverActivity(1,driverId);
+                await startDeal(socket, confirmId, driverId, postId, bestPirceChoose, driverId);
+            } else{
+                console.log('userConfirm data found, start update');
+                await confirmData.update({'_id':dataInvalid._id},{
+                    $set:{
+                        userId: userId
+                    }
+                });
+                return;
+            }
+        });
+
+        socket.on('driverConfirm',async data=>{
+            if ( !socket.request.session.passport){
+                return;
+            }
+            let driverId = socket.request.session.passport.user;
+            let bestPirceChoose = data.bestPirceChoose;
+            let postId = data.postId;
+            let userId = data.userId;
+
+            let dataInvalid = await confirmData.findOne({'userId':userId,'postId':postId});
+
+            //Nếu dữ liệu chưa tồn tại
+            if (!dataInvalid){
+                console.log('driverConfirm data not found');
+                let confirm = new confirmData({
+                    postId:postId,
+                    driverId: driverId
+                });
+                await confirm.save({_id:false});
+                updateDriverActivity(1,driverId);
+                let confirmId = confirm._id;
+                await startDeal(socket, confirmId, userId, postId, bestPirceChoose, driverId);
+            } else{
+                console.log('driverConfirm data found, start update');
+                await confirmData.update({'_id':dataInvalid._id},{
+                    $set:{
+                        driverId: driverId
+                    }
+                });
+                return;
+            }
+        });
+
+        socket.on('decline_customer',async ()=>{
+            if ( !socket.request.session.passport){
+                return;
+            }
+            let userId = socket.request.session.passport.user;
+
+            updateDriverActivity(0,userId);
+
+            socket.emit('decline_customer_success',{message:'success'});
+        });
     });
 };
+function startDeal(socket, confirmId, broadcastId, postId, bestPirceChoose, driverId) {
+    return new Promise(resolve => {
+        setTimeout(async () => {
+            let confirmStore = await confirmData.findById(confirmId);
+            if (!confirmStore.driverId || !confirmStore.userId){
+                updateDriverActivity(0,driverId);
+                socket.emit('deal_build_error',{message:'this user busy'});
+                await confirmData.remove({'_id':confirmId});
+                return;
+            }
+            let postStore = await postRepository.findById(postId);
+            console.log("Confirm store"+confirmStore);
+            let order = {
+                userId: confirmStore.userId,
+                driverId: confirmStore.driverId,
+                location:postStore.location,
+                destination:postStore.destination,
+                price:bestPirceChoose
+            };
+            let orderDetail = await orderRepository.saveOrder(order);
+            socket.emit('deal_build_success',{message: 'Giao dịch thành công'});
+            socket.broadcast.to(broadcastId+"_private").emit('deal_build_success',{message: 'Giao dịch thành công'});
+            //await confirmData.remove({'_id':confirmId});
+        }, 20000);
+    });
+}
+
 let sortBID = (a,b) =>{
     if (a.price > b.price) return -1;
     if (a.price < b.price) return 1;
     return 0;
 };
+
+let findDriver = async (postId) =>{
+    let driverBid = await postRepository.findById(postId);
+
+    let filterDriver = driverBid.bid.map(d => {
+        return { 'driverId': d.driverId,'price': d.price};
+    });
+    return filterDriver;
+    /*async myFunc() {
+        const res = await getAsync('foo');
+        console.log(res);
+    }*/
+};
+
+let updateDriverActivity = (activity,driverId) =>{
+  let dataOne = {
+      driverId: driverId,
+      status:0
+  };
+  let  dataTwo = {
+        driverId: driverId,
+        status:1
+  };
+    switch (activity){
+        case 0:{
+            client.srem(redis_key,JSON.stringify(dataTwo));
+            client.sadd(redis_key,JSON.stringify(dataOne));
+            break;
+        }
+        case 1:{
+            client.srem(redis_key,JSON.stringify(dataOne));
+            client.sadd(redis_key,JSON.stringify(dataTwo));
+            break;
+        }
+    }
+};
+
 var init = (app) =>{
 
     let server 	= require('http').Server(app);
@@ -152,6 +338,9 @@ var init = (app) =>{
         require('../session')(socket.request, {}, next);
     });
 
+    client = storeRedis.createClient('redis://' + config.redis.user + ':' + config.redis.password + '@' + host + ':' + port);
+
+    client.del(redis_key);
 
     processEvent(io);
 
