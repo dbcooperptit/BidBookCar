@@ -61,7 +61,7 @@ var bidSocket = {
             $('#add-new-status').closest('.input-group').find('.form-control').val('');
         });
 
-        $('#end-timeout').click(evt => {
+        $('#book-bike').on('click', '#end-timeout', function(evt){
             let value = $('#end-timeout').attr('data-value');
             let postId = $('#id_post').val();
             socket.emit('adjourn_post', {value: value, postId: postId});

@@ -91,8 +91,8 @@ var processEvent = (io) =>{
                     expiredTime = postStore.expiredTime;
                     isHidden = true;
                 }
-                console.log({'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden});
                 socket.emit('success_adjourn',{'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden});
+                socket.broadcast.emit('adjourn_to_drivers',{'postId':data.postId,'expiredTime':expiredTime,'isHidden':isHidden})
             }
         });
 

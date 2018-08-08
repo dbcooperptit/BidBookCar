@@ -323,7 +323,7 @@
                                 <p style="text-transform: uppercase; color: #333; font-weight: bold; font-size: 15px; margin-bottom: 15px; margin-top: 10px">
                                     <i class="fa fa-clock-o" aria-hidden="true"></i> Thời gian còn lại
                                 </p>
-                                <span class="badge bg-red count-downs-expiredTime" data-await-time="post.expiredTime"></span>
+                                <span class="badge bg-red count-downs-expiredTime" data-await-time="<%= x.post.expiredTime%>"></span>
 
                             </div>
                             <div class="box-footer">
@@ -464,6 +464,10 @@
 <script>
     $(document).ready(function (evt) {
         bidSocket.driverSocket();
+        $('.block-post').each(function (val,item) {
+            var idPost = $(this).attr('id');
+            countDownsBlock(idPost);
+        });
     });
 </script>
 </body>

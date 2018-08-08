@@ -27,9 +27,21 @@ let bidSocket = {
         socket.on('status_to_driver',data =>{
             $('.trip-info').text(data.newStatus);
         });
+
         socket.on('driverIndexSuccess',data =>{
             console.log(data);
-        })
+        });
+
+        socket.on('adjourn_to_drivers',data =>{
+            console.log(data)
+           if (!data.isHidden){
+               let postId = data.postId;
+               $('#'+postId).css('display','block');
+
+               $('#'+postId).find('.count-downs-expiredTime').attr('data-await-time',data.expiredTime);
+               countDownsBlock(postId);
+           };
+        });
     }
 
 };
@@ -174,16 +186,8 @@ let countDownsBlock = (idPost) =>{
         $('#'+idPost).find('.count-downs-expiredTime').text( minutes + "m " + seconds + "s ");
         // If the count down is finished, write some text
         if (distance < 0) {
-            // clearInterval(x);
-            // bootbox.prompt({
-            //     title: "Would you want to renew!",
-            //     inputType: 'number',
-            //     callback: function (result) {
-            //         let value = result == null ? 0: result;
-            //         $('#end-timeout').attr('data-value',value);
-            //         $('#end-timeout').click();
-            //     }
-            // });
+            clearInterval(x);
+            $('#'+idPost).css('display','none');
             console.log('expired');
         }
     }, 1000);

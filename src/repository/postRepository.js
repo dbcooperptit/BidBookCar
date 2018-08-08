@@ -57,7 +57,7 @@ PostRepository.addPost = async (data) =>{
 
 PostRepository.updateExpiredTime = async (data) => {
   try {
-      await Post.update({'_id':data.id},{
+      await Post.update({'_id':data.postId},{
           $set:{
               expiredTime: data.expiredTime
           }
