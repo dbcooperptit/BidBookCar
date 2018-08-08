@@ -121,6 +121,30 @@ var bidSocket = {
                 size: 'small'
             });
         });
+
+        $('#book-bike').on('click','.customer-choose-drivers', function () {
+           let driverId = $(this).attr('data-driverId');
+            let postId = $("#id_post").val();
+           socket.emit('customer_choose_driver',driverId, postId);
+           $("#modal-info").modal('show');
+           $('#modal-info .modal-body').html("<h2>Đang chờ phản hồi từ driver</h2>");
+
+        });
+        socket.on('driver_busy_to_user',data=>{
+            $("#modal-info").modal('show');
+            let html = '<h2>'+data.message+'</h2>';
+            $('#modal-info .modal-body').html(html);
+
+        });
+
+        socket.on('driver_report_success',data=>{
+            $("#modal-info").modal('show');
+            showDetailOrder(data.orderNew);
+            $("#modal-info .modal-footer").html(' <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>\n' +
+                '                <button type="button" class="btn btn-outline">Save changes</button>');
+            $("#book-bike").empty();
+        });
+
         socket.on('reconnect', () => {
             location.reload();
         });
@@ -227,7 +251,7 @@ var displayPost = (post) => {
 };
 
 var displayUser = (user, datePost, postId) => {
-    let html = '<input id="id_post" type="hidden" value="' + postId + '"/><div class="user-block">' +
+    let html = '<div class="user-block">' +
         '<img class="img-circle img-bordered-sm" src="' + user.picture + '" alt="user image">' +
         '<span class="username">' +
         '<a href="#">' + user.fullName + '</a>' +
@@ -248,7 +272,8 @@ var displayListBid = (data) => {
         '                                                                    <th style="width: 10px">#</th>\n' +
         '                                                                    <th>Tên tài xế</th>\n' +
         '                                                                    <th>Giá tiền</th>\n' +
-        '                                                                    <th style="width: 40px">Giờ đón</th>\n' +
+        '                                                                    <th>Giờ đón</th>\n' +
+        '                                                                    <th>Action</th>\n' +
         '                                                                </tr>\n' +
         trHtml +
         '                                                            </tbody>\n' +
@@ -271,6 +296,9 @@ var trListBid = (data) => {
             '                                                                    <td>\n' +
             '                                                                        <span class="badge bg-red">' + localDateTime(data[0].awaitTime) + '</span>\n' +
             '                                                                    </td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <a class="badge bg-red customer-choose-drivers" data-driverId="'+data[0].driverId+'"> Chọn </a>\n' +
+            '                                                                    </td>\n' +
             '                                                                </tr>\n';
     }
     //Top 2
@@ -284,6 +312,9 @@ var trListBid = (data) => {
             '                                                                   </td>\n' +
             '                                                                    <td>\n' +
             '                                                                        <span class="badge bg-warning">' + localDateTime(data[1].awaitTime) + '</span>\n' +
+            '                                                                    </td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <a class="badge bg-warning customer-choose-drivers" data-driverId="'+data[1].driverId+'"> Chọn </a>\n' +
             '                                                                    </td>\n' +
             '                                                                </tr>\n';
     }
@@ -299,6 +330,9 @@ var trListBid = (data) => {
             '                                                                    <td>\n' +
             '                                                                        <span class="badge bg-aqua ">' + localDateTime(data[2].awaitTime) + '</span>\n' +
             '                                                                    </td>\n' +
+            '                                                                    <td>\n' +
+            '                                                                        <a class="badge bg-warning customer-choose-drivers" data-driverId="'+data[2].driverId+'"> Chọn </a>\n' +
+            '                                                                    </td>\n' +
             '                                                                </tr>\n';
     }
     //Top 4-> n;
@@ -310,10 +344,13 @@ var trListBid = (data) => {
                 '                                                                    <td>' + x + '</td>\n' +
                 '                                                                    <td>' + data[x].fullName + '</td>\n' +
                 '                                                                    <td>\n' +
-                '                                                                        <span class="badge bg-default">' + data[x].price + ' VNĐ</span>\n' +
-                '                                                                   </td>\n' +s
+                '                                                                        <span class="badge">' + data[x].price + ' VNĐ</span>\n' +
+                '                                                                   </td>\n' +
                 '                                                                    <td>\n' +
-                '                                                                        <span class="badge bg-default">' + localDateTime(data[x].awaitTime) + '</span>\n' +
+                '                                                                        <span class="badge">' + localDateTime(data[x].awaitTime) + '</span>\n' +
+                '                                                                    </td>\n' +
+                '                                                                    <td>\n' +
+                '                                                                        <a class="badge customer-choose-drivers" data-driverId="'+data[x].driverId+'"> Chọn </a>\n' +
                 '                                                                    </td>\n' +
                 '                                                                </tr>\n';
         }
@@ -378,6 +415,9 @@ var countDown = (time) => {
 
         // Display the result in the element with id="demo"
        // document.getElementById("count-downs").innerHTML = minutes + "m " + seconds + "s ";
+        if($("#count-downs").length < 1){
+            clearInterval(x);
+        }
         $("#count-downs").text( minutes + "m " + seconds + "s ");
         // If the count down is finished, write some text
         if (distance < 0) {
@@ -402,7 +442,35 @@ let countDownProcessDeal = (time) =>{
         $('#modal-info').find('.time-deal').text(time+' s');
         if (time<0){
             clearInterval(x);
-            $('#modal-info').modal('hide');
         }
     },1000)
+
+};
+
+let showDetailOrder = (data)=>{
+    let html = '<div class="table-responsive">\n' +
+        '<table class="table no-margin">\n' +
+        ' <thead>\n' +
+        '<tr>\n' +
+        '<th style="text-align:center;">Mục</th>\n' +
+        '<th style="text-align:center;">Chi tiết</th>\n' +
+        '</tr>\n' +
+        '</thead>\n' +
+        '<tbody>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Điểm đi</td>\n' +
+        '<td style="text-align:center;">'+data.location+'</td>\n' +
+        '</tr>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Điểm đến</td>\n' +
+        '<td style="text-align:center;">'+data.destination+'</td>\n' +
+        '</tr>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Giá</td>\n' +
+        '<td style="text-align:center;">'+data.price+'</td>\n' +
+        '</tr>\n' +
+        '</tbody>\n' +
+        '</table>\n' +
+        '</div>';
+    $('#modal-info .modal-body').html(html);
 };

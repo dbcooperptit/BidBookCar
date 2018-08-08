@@ -246,9 +246,81 @@ var processEvent = (io) =>{
             let userId = socket.request.session.passport.user;
 
             updateDriverActivity(0,userId);
-
             socket.emit('decline_customer_success',{message:'success'});
         });
+
+        //region customer choose driver
+
+        socket.on('customer_choose_driver',async (driverId, postId) =>{
+           if (!socket.request.session.passport){
+               return;
+           }
+           let userId = socket.request.session.passport.user;
+           client.smembers(redis_key,async (err,replies)=>{
+               if (err) throw err;
+               let driverActivity = replies.map(x=> JSON.parse(x));
+
+               let driverFree = driverActivity.filter(x=>{
+                   return x.driverId === driverId && x.status ===0;
+               });
+
+               console.log("Driver free"+driverFree);
+               if (!driverFree){
+                   socket.emit('driver_busy_to_user',{message:' The driver is busy. '});
+               }else {
+                   let postData = await postRepository.findById(postId);
+                   let user = await userRepository.findById(userId);
+                   socket.broadcast.to(driverId + "_private").emit('send_request_to_driver', {
+                       'postInfo': postData,
+                       'userInfo': user
+                   });
+                   updateDriverActivity(1, driverId);
+               }
+           })
+        });
+
+        socket.on('driver_send_report', async (userId, postId)=>{
+            if (!socket.request.session.passport){
+                return;
+            }
+            let driverId = socket.request.session.passport.user;
+            updateDriverActivity(1,driverId);
+            let postInfo = await postRepository.findById(postId);
+            let price = 0;
+            postInfo.bid.forEach(x=>{
+                if ( x.driverId === driverId){
+                    price = x.price;
+                }
+            });
+            let order = {
+                userId: postInfo.userId,
+                driverId: driverId,
+                location:postInfo.location,
+                destination:postInfo.destination,
+                price: price
+            };
+            let updatePost = {
+                postId: postId,
+                expiredTime: new Date()
+            }
+            let orderNew = await orderRepository.saveOrder(order);
+            await postRepository.updateExpiredTime(updatePost);
+            socket.emit('driver_report_success',{'orderNew':orderNew,'postId':postId});
+            socket.broadcast.to(userId+"_private").emit('driver_report_success',{'orderNew':orderNew,'postId':postId});
+            setTimeout(()=>{
+                updateDriverActivity(0,driverId);
+            },120000);
+        });
+
+        socket.on('decline_from_driver',async (userId)=>{
+            if ( !socket.request.session.passport){
+                return;
+            }
+            let driverId = socket.request.session.passport.user;
+            updateDriverActivity(0,driverId);
+            socket.broadcast.to(userId+"_private").emit('driver_busy_to_user',{message:'The driver is busy'});
+        });
+        //end region
     });
 };
 function startDeal(socket, confirmId, broadcastId, postId, bestPirceChoose, driverId) {
@@ -273,6 +345,9 @@ function startDeal(socket, confirmId, broadcastId, postId, bestPirceChoose, driv
             let orderDetail = await orderRepository.saveOrder(order);
             socket.emit('deal_build_success',{message: 'Giao dịch thành công'});
             socket.broadcast.to(broadcastId+"_private").emit('deal_build_success',{message: 'Giao dịch thành công'});
+            setTimeout(()=>{
+               updateDriverActivity(0,confirmStore.driverId);
+            },120000);
             //await confirmData.remove({'_id':confirmId});
         }, 20000);
     });
@@ -346,5 +421,4 @@ var init = (app) =>{
 
     return server;
 };
-
 module.exports = init;

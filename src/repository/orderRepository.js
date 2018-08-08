@@ -11,4 +11,12 @@ OrderRepository.saveOrder = async (data)=>{
       throw e.message;
   }
 };
+
+OrderRepository.findAll = async () =>{
+    try {
+        return await Order.find();
+    }catch (e) {
+        throw e;
+    }
+}
 module.exports = OrderRepository;

@@ -488,6 +488,18 @@
             var idPost = $(this).attr('id');
             countDownsBlock(idPost);
         });
+
+        $.ajax({
+            url:'/drivers/top',
+            dataType:'json',
+            type:'GET',
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (err) {
+                console.log(err.responseText);
+            }
+        })
     });
 </script>
 </body>

@@ -1,3 +1,4 @@
+let timeoutDeal = null;
 let bidSocket = {
     driverSocket: () => {
         var socket = io('/bidchannel', {transports: ['websocket']});
@@ -49,6 +50,7 @@ let bidSocket = {
             showChooseModal(data);
             showFooterModal(data);
             countDownProcessDeal(10)
+
         });
 
         $('#modal-info').on('click','.confirm_choose_bid',function (evt) {
@@ -75,13 +77,42 @@ let bidSocket = {
 
         $('#modal-info').on('click','.not_choose_poster',function (evt) {
             socket.emit('decline_customer');
-        })
+        });
 
         socket.on('decline_customer_success',data =>{
             if (data.message ==='success'){
                 $('#modal-info').modal('hide');
             }
+        });
+
+        socket.on('send_request_to_driver',data=>{
+            $('#modal-info').modal('show');
+            console.log(data);
+            showDealBodyModal(data);
+            showDealFooterModal(data);
+            countDownProcessDeal(10);
+            timeoutReal(data.postInfo._id);
+        });
+
+        $('#modal-info').on('click','.decline-from-driver',function (evt) {
+            let userId = $(this).attr('data-userId');
+            socket.emit('decline_from_driver',userId);
         })
+
+        $('#modal-info').on('click','.driver-send-report',function (evt) {
+            let userId = $(this).attr('data-userId');
+            let postId = $(this).attr('data-postId');
+            socket.emit('driver_send_report',userId, postId);
+
+        });
+
+        socket.on('driver_report_success',data=>{
+            showDetailOrder(data.orderNew);
+            $("#"+data.postId).remove();
+            $("#modal-info .modal-footer").html(' <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>\n' +
+                '                <button type="button" class="btn btn-outline">Save changes</button>');
+            clearTimeout(timeoutDeal);
+        });
     }
 
 };
@@ -281,6 +312,7 @@ let countDownsBlock = (idPost) => {
 
         // Display the result in the element with id="demo"
         //document.getElementById("count-downs").innerHTML = minutes + "m " + seconds + "s ";
+
         $('#' + idPost).find('.count-downs-expiredTime').text(minutes + "m " + seconds + "s ");
         // If the count down is finished, write some text
         if (distance < 0) {
@@ -297,7 +329,97 @@ let countDownProcessDeal = (time) =>{
         $('#modal-info').find('.time-deal').text(time+' s');
         if (time<0){
             clearInterval(x);
-            $('#modal-info').modal('hide');
         }
     },1000)
+};
+
+
+
+let timeoutReal = (postId) => {
+    timeoutDeal = setTimeout(()=>{
+        if ($('#'+postId).length>0) {
+            $('#modal-info .decline-from-driver').click();
+            $('#modal-info').modal('hide');
+        }
+    },15000);
+}
+//customize modal deal
+let showDealBodyModal = (data)=>{
+    let html ='<div class="box box-widget widget-user-2">\n' +
+        '            <!-- Add the bg color to the header using any of the bg-* classes -->\n' +
+        '            <div class="widget-user-header bg-yellow">\n' +
+        '              <div class="widget-user-image">\n' +
+        '                <img class="img-circle" src="'+data.userInfo.picture+'" alt="'+data.userInfo.fullName+'">\n' +
+        '              </div>\n' +
+        '              <!-- /.widget-user-image -->\n' +
+        '              <h3 class="widget-user-username">'+data.userInfo.fullName+'</h3>\n' +
+        '              <h5 class="widget-user-desc">Customer</h5>\n' +
+        '            </div>\n' +
+        '            <div class="box-footer no-padding">\n' +
+        '              <ul class="nav nav-stacked">\n' +
+        '                <li><a href="#">Điểm đi <span class="pull-right badge bg-blue">'+data.postInfo.location+'</span></a></li>\n' +
+        '                <li><a href="#">Điểm đến <span class="pull-right badge bg-aqua">'+data.postInfo.destination+'</span></a></li>\n' +
+        '                <li><a href="#">Tổng quãng đường <span class="pull-right badge bg-green">'+data.postInfo.totalDistance+'</span></a></li>\n' +
+        '              </ul>\n' +
+        '            </div>\n' +
+        '          </div>'
+
+    $('#modal-info .modal-body').html(html);
+};
+
+let showDealFooterModal = (data) =>{
+    let html =' <div class="row">\n' +
+        '                <div class="col-sm-4 border-right">\n' +
+        '                  <div class="description-block">\n' +
+        '                    <a class="btn btn-danger decline-from-driver" data-userId="'+data.userInfo._id+'">Từ chối</a>\n' +
+        '                  </div>\n' +
+        '                  <!-- /.description-block -->\n' +
+        '                </div>\n' +
+        '                <!-- /.col -->\n' +
+        '                <div class="col-sm-4 border-right">\n' +
+        '                  <div class="description-block">\n' +
+        '                    <h5 class="badge bg-red time-deal"></h5>\n' +
+        '                    <span class="description-text">Thời gian chờ còn lại</span>\n' +
+        '                  </div>\n' +
+        '                  <!-- /.description-block -->\n' +
+        '                </div>\n' +
+        '                <!-- /.col -->\n' +
+        '                <div class="col-sm-4">\n' +
+        '                  <div class="description-block">\n' +
+        '                    <a class="btn btn-success driver-send-report" data-userId="'+data.userInfo._id+'" data-postId="'+data.postInfo._id+'">Đi ngay</a>\n' +
+        '                  </div>\n' +
+        '                  <!-- /.description-block -->\n' +
+        '                </div>\n' +
+        '                <!-- /.col -->\n' +
+        '              </div>\n' +
+        '              <!-- /.row -->'
+    $('#modal-info .modal-footer').html(html);
+};
+
+let showDetailOrder = (data)=>{
+    let html = '<div class="table-responsive">\n' +
+        '<table class="table no-margin">\n' +
+        ' <thead>\n' +
+        '<tr>\n' +
+        '<th style="text-align:center;">Mục</th>\n' +
+        '<th style="text-align:center;">Chi tiết</th>\n' +
+        '</tr>\n' +
+        '</thead>\n' +
+        '<tbody>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Điểm đi</td>\n' +
+        '<td style="text-align:center;">'+data.location+'</td>\n' +
+        '</tr>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Điểm đến</td>\n' +
+        '<td style="text-align:center;">'+data.destination+'</td>\n' +
+        '</tr>\n' +
+        '<tr>\n' +
+        '<td style="text-align:center;">Giá</td>\n' +
+        '<td style="text-align:center;">'+data.price+'</td>\n' +
+        '</tr>\n' +
+        '</tbody>\n' +
+        '</table>\n' +
+        '</div>';
+    $('#modal-info .modal-body').html(html);
 };

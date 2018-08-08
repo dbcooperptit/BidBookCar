@@ -1,5 +1,6 @@
 var postRepository = require('../repository/postRepository');
 var userRpeository  = require('../repository/userRepository');
+var orderRepository = require('../repository/orderRepository');
 var DriverController={}
 
 DriverController.index = async(req,res,next) =>{
@@ -31,6 +32,32 @@ DriverController.index = async(req,res,next) =>{
       });
 
 };
+
+DriverController.topDriver = async (req,res,next) =>{
+    let allOrder = await orderRepository.findAll();
+    let driverId = allOrder
+        .map(x=>x.driverId)
+        .reduce((newData,x)=>{
+            let flag =false;
+            newData.forEach(nd=>{
+                if(nd.driverId === x){
+                    nd.total ++;
+                    flag=true;
+                }
+            });
+            if (!flag) newData.push({driverId: x, total:1});
+            return newData;
+        },[])
+        .sort((a,b)=> b.total - a.total);
+
+    let topDriver = driverId.map(async x =>{
+        let driver = await userRpeository.findById(x.driverId);
+        return {'driver':driver,'total':x.total};
+    });
+
+    await Promise.all(topDriver).then(item => res.send(item));
+};
+
 var sortbyDate = (a, b) =>{
     var c = new Date(a.createAt);
     var d = new Date(b.createAt);
