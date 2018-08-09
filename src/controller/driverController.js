@@ -37,7 +37,7 @@ DriverController.index = async(req,res,next) =>{
 };
 
 DriverController.topDriver = async (req,res,next) =>{
-    let client = redis.createClient('redis://' + config.redis.user + ':' + config.redis.password + '@' + config.redis.host + ':' + config.redis.port);
+    let client = redis.createClient('redis://' + config.redis.host + ':' + config.redis.port);
 
     let allOrder = await orderRepository.findAll();
     let driverId = allOrder
@@ -63,7 +63,6 @@ DriverController.topDriver = async (req,res,next) =>{
      Promise.all(topDriver).then(item =>{
         client.smembers('driver_activity_status',(err, replies)=>{
            if (err) throw err;
-           console.log("Replies: "+replies);
            let driverActivity = replies.map(x=>JSON.parse(x));
            let data = item.map(i=>{
               let active = 1;

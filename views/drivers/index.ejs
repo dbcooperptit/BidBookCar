@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>AdminLTE 2 | User Profile</title>
+    <title>BID | Driver</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.7 -->
@@ -18,8 +18,9 @@
     <link rel="stylesheet" href="/stylesheets/profile/AdminLTE.min.css">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
         folder instead of downloading all of them to reduce the load. -->
-    <link rel="stylesheet" href="/stylesheets/profile/_all-skins.min.css"
+    <link rel="stylesheet" href="/stylesheets/profile/_all-skins.min.css">
 
+    <link rel="stylesheet" href="/vendor/toast/toastr.min.css"/>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -39,7 +40,7 @@
         <nav class="navbar navbar-static-top">
             <div class="container">
                 <div class="navbar-header">
-                    <a href="img/2140822-RKJFOMQX-7.jpg" class="navbar-brand"><b>Admin</b>LTE</a>
+                    <a href="img/2140822-RKJFOMQX-7.jpg" class="navbar-brand"><b>BID</b> DRIVER</a>
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                             data-target="#navbar-collapse">
                         <i class="fa fa-bars"></i>
@@ -48,23 +49,7 @@
 
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-                        <li><a href="#">Link</a></li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span
-                                        class="caret"></span></a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something else here</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">One more separated link</a></li>
-                            </ul>
-                        </li>
-                    </ul>
+
                     <form class="navbar-form navbar-left" role="search">
                         <div class="form-group">
                             <input type="text" class="form-control" id="navbar-search-input" placeholder="Search">
@@ -233,8 +218,8 @@
                     <!-- Content Header (Page header) -->
                     <section class="content-header">
                         <h1>
-                            Top Navigation
-                            <small>Example 2.0</small>
+                            Home BID
+                            <small>Hướng tới tương lai !!</small>
                         </h1>
                     </section>
 
@@ -306,7 +291,7 @@
                                     </tr>
                                     <tr style="text-align: center;">
                                         <td>
-                                            <span class="badge bg-green"><%= x.bestPrice %></span>
+                                            <span class="badge bg-green" id="<%= x.post._id%>-best-price"><%= x.bestPrice %></span>
                                         </td>
                                         <td>
                                         </td>
@@ -349,7 +334,7 @@
                 <div class="col-md-3 no-padding">
                     <div class="content-header">
                         <h1>
-                            Top Navigation
+                            Top Driver
                         </h1>
                     </div>
                     <div class="content">
@@ -368,7 +353,7 @@
             <div class="pull-right hidden-xs">
                 <b>Version</b> 2.4.0
             </div>
-            <strong>Copyright &copy; 2014-2016 <a href="https://adminlte.io">Almsaeed Studio</a>.</strong> All rights
+            <strong>Copyright &copy; 2014-2019 <a href="#">PTIT Team</a>.</strong> All rights
             reserved.
         </div>
         <!-- /.container -->
@@ -402,6 +387,8 @@
 <script src="/javascripts/profilejs/bootstrap.min.js"></script>
 <script src="/javascripts/profilejs/adminlte.min.js"></script>
 <script src="/vendor/bootbox/bootbox.min.js"></script>
+<script src="/vendor/toast/toastr.min.js"></script>
+<script src="/vendor/toast/notify.option.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/driverjs/index.js"></script>
 <script>
@@ -412,52 +399,8 @@
             countDownsBlock(idPost);
         });
 
-        setTimeout(()=>{
-            $.ajax({
-                url:'/drivers/top',
-                dataType:'json',
-                type:'GET',
-                success: function (data) {
-                    console.log(data);
-                    topDriver(data);
-                },
-                error: function (err) {
-                    console.log(err.responseText);
-                }
-            })
-        },5000)
     });
-    let topDriver = (data) =>{
-        let liHtml = liData(data)
-        let html =
-            '            <div class="box-body">\n' +
-            '              <ul class="products-list product-list-in-box">\n' +
-                                liHtml+
-            '              </ul>\n' +
-            '            </div>\n' ;
-        $('#top-drivers-bid').html(html);
-    }
-    let liData = (listData)=>{
-        let html='';
-        listData.forEach(data=>{
-            let value = data.activity === 0? 'success':'yellow';
-            html +=
-            '                <li class="item">\n' +
-            '                  <div class="product-img">\n' +
-            '                    <img src="'+data.driver.picture+'" alt="'+data.driver.fullName+'">\n' +
-            '                  </div>\n' +
-            '                  <div class="product-info">\n' +
-            '                    <a href="javascript:void(0)" class="product-title">'+ data.driver.fullName +
-            '                      <span class="label label-warning pull-right">'+data.total+'</span></a>\n' +
-                                '<span class="product-description">\n' +
-                                    '<a href="#"><i class="fa fa-circle text-'+value+'"></i>'+data.activity+'</a>'+
-                '                        </span>'+
-            '                  </div>\n' +
 
-            '                </li>\n';
-        })
-        return html;
-    }
 </script>
 </body>
 </html>

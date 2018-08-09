@@ -2,9 +2,11 @@ let timeoutDeal = null;
 let bidSocket = {
     driverSocket: () => {
         var socket = io('/bidchannel', {transports: ['websocket']});
+
         socket.on('connect', () => {
             socket.emit('init_channel');
         });
+
         $('.content').on('click', '.send-bid', function (evt) {
             var post = $(this).closest('.block-post');
             var postId = $(post).attr('id');
@@ -12,8 +14,12 @@ let bidSocket = {
             let arrivalTime = $(post).find('.driver-arrival-time').val();
             socket.emit('driverBid', {postId: postId, bid: bid, arrivalTime: arrivalTime});
         });
+
         socket.on("driverIndexNewPost", data => {
             console.log(data);
+            let title = data.user.fullName;
+            let message = "Đã đăng bài mới";
+            showDialogNotify(message,title,'info');
             showBlockPost(data);
         });
 
@@ -31,6 +37,7 @@ let bidSocket = {
 
         socket.on('driverIndexSuccess', data => {
             console.log(data);
+            $("#"+data.postId+'-best-price').text(data.bestPrice);
         });
 
         socket.on('adjourn_to_drivers', data => {
@@ -63,20 +70,29 @@ let bidSocket = {
                 bestPirceChoose: price,
                 userId: userId
             };
-
             socket.emit('driverConfirm',data);
+            let htmlDeal = '<img src="/images/giphy_2.gif" class="img-responsive" style="height: 200px;width: 100%;">\n';
+            $("#modal-info .modal-body").html(htmlDeal);
+            $('#modal-info .modal-title').html('Quá trình giao dịch dang diễn ra ...');
+            $('#modal-info .modal-footer').empty();
+        });
+
+        socket.on("deal_build_error",data=>{
+            $("#modal-info").modal('show');
+            $("#modal-info .modal-body").html(data.message);
+            $('#modal-info .modal-title').html('Thông báo');
         });
 
         socket.on('deal_build_success',data=>{
-            $('#modal-info').modal('hide');
-            bootbox.alert({
-                message: data.message,
-                size: 'small'
-            });
+
+            $("#modal-info").modal('show');
+            $("#modal-info .modal-body").html(data.message);
+            $('#modal-info .modal-title').html('Thông báo');
         });
 
         $('#modal-info').on('click','.not_choose_poster',function (evt) {
             socket.emit('decline_customer');
+            $("#modal-info").modal('hide');
         });
 
         socket.on('decline_customer_success',data =>{
@@ -97,6 +113,7 @@ let bidSocket = {
         $('#modal-info').on('click','.decline-from-driver',function (evt) {
             let userId = $(this).attr('data-userId');
             socket.emit('decline_from_driver',userId);
+            $("#modal-info").modal('hide');
         })
 
         $('#modal-info').on('click','.driver-send-report',function (evt) {
@@ -107,11 +124,28 @@ let bidSocket = {
         });
 
         socket.on('driver_report_success',data=>{
+            $("#modal-info").modal("show");
+            $("#modal-info .modal-title").text("Thông báo");
+            $("#modal-info .modal-footer").empty();
             showDetailOrder(data.orderNew);
             $("#"+data.postId).remove();
-            $("#modal-info .modal-footer").html(' <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>\n' +
-                '                <button type="button" class="btn btn-outline">Save changes</button>');
             clearTimeout(timeoutDeal);
+
+        });
+
+        socket.on('reload_driver_activity',message=>{
+            $.ajax({
+                url:'/drivers/top',
+                dataType:'json',
+                type:'GET',
+                success: function (data) {
+                    console.log(data);
+                    topDriver(data);
+                },
+                error: function (err) {
+                    console.log(err.responseText);
+                }
+            })
         });
     }
 
@@ -179,12 +213,12 @@ let showPost = (post) => {
         '                                    </tr>\n' +
         '                                    <tr style="text-align: center;">\n' +
         '                                        <td>\n' +
-        '                                            <span class="badge bg-green">' + post.price + '</span>\n' +
+        '                                            <span class="badge bg-green" id="'+post._id+'-best-price">' + post.init_money + '</span>\n' +
         '                                        </td>\n' +
         '                                        <td>\n' +
         '                                        </td>\n' +
         '                                        <td>\n' +
-        '                                            <span class="badge bg-danger">VNĐ</span>\n' +
+        '                                            <span class="badge bg-red">VNĐ</span>\n' +
         '                                        </td>\n' +
         '                                    </tr>\n' +
         '                                    </tbody>\n' +
@@ -333,8 +367,6 @@ let countDownProcessDeal = (time) =>{
     },1000)
 };
 
-
-
 let timeoutReal = (postId) => {
     timeoutDeal = setTimeout(()=>{
         if ($('#'+postId).length>0) {
@@ -422,4 +454,38 @@ let showDetailOrder = (data)=>{
         '</table>\n' +
         '</div>';
     $('#modal-info .modal-body').html(html);
+};
+
+//disconnect/connection
+let topDriver = (data) =>{
+    let liHtml = liData(data)
+    let html =
+        '            <div class="box-body">\n' +
+        '              <ul class="products-list product-list-in-box">\n' +
+        liHtml+
+        '              </ul>\n' +
+        '            </div>\n' ;
+    $('#top-drivers-bid').html(html);
+};
+
+let liData = (listData)=>{
+    let html='';
+    listData.forEach(data=>{
+        let value = data.activity === "Online"? 'success':'yellow';
+        html +=
+            '                <li class="item">\n' +
+            '                  <div class="product-img">\n' +
+            '                    <img src="'+data.driver.picture+'" alt="'+data.driver.fullName+'">\n' +
+            '                  </div>\n' +
+            '                  <div class="product-info">\n' +
+            '                    <a href="javascript:void(0)" class="product-title">'+ data.driver.fullName +
+            '                      <span class="label label-warning pull-right">'+data.total+'</span></a>\n' +
+            '<span class="product-description">\n' +
+            '<a href="#"><i class="fa fa-circle text-'+value+'"></i> '+data.activity+'</a>'+
+            '                        </span>'+
+            '                  </div>\n' +
+
+            '                </li>\n';
+    })
+    return html;
 };

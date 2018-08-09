@@ -4,5 +4,8 @@ var authController = require('../src/controller/authorizationController');
 var userController = require('../src/controller/userController')
 /* GET users listing. */
 router.get('/profiles',authController.isAuthenticated,authController.roleAuthorization(['user']), userController.getProfile);
-router.post('/doUpdateUser',userController.doUpdateUser);
+
+router.post('/doUpdateUser',authController.isAuthenticated,authController.roleAuthorization(['user']),userController.doUpdateUser);
+
+router.get('/orderDetail',authController.isAuthenticated,authController.roleAuthorization(['user']),userController.orderDetail);
 module.exports = router;

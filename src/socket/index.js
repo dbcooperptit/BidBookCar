@@ -34,6 +34,8 @@ var processEvent = (io) =>{
             }
 
             console.log('userId: '+userId);
+            socket.emit('reload_driver_activity',{message: 'connection'});
+            socket.broadcast.emit('reload_driver_activity',{message: 'connection'});
         });
 
         socket.on('caculator_money',totalDistance =>{
@@ -165,7 +167,7 @@ var processEvent = (io) =>{
 
                     let posts = await postRepository.findById(data.postId);
                     let bidColl = posts.bid.sort(sortBID);
-                    socket.emit('driverIndexSuccess',{message:'BID success',bid: data});
+                    socket.emit('driverIndexSuccess',{message:'BID success',postId: data.postId, bestPrice: bidColl[0].price});
                     socket.broadcast.to(posts.userId+"_private").emit('driverBidToUser',{ 'allBid': bidColl});
                 }
             } catch(e){
@@ -247,6 +249,7 @@ var processEvent = (io) =>{
 
             updateDriverActivity(0,userId);
             socket.emit('decline_customer_success',{message:'success'});
+            console.log('decline_accepts');
         });
 
         //region customer choose driver
@@ -320,6 +323,18 @@ var processEvent = (io) =>{
             updateDriverActivity(0,driverId);
             socket.broadcast.to(userId+"_private").emit('driver_busy_to_user',{message:'The driver is busy'});
         });
+        
+        socket.on('disconnect',async()=>{
+            if (!socket.request.session.passport){
+                return;
+            }
+            let userId = socket.request.session.passport.user;
+            let user = await userRepository.findById(userId);
+            if (user.role === 'driver'){
+                updateDriverActivity(1,userId);
+            }
+            socket.broadcast.emit('reload_driver_activity',{message: 'disconnect'});
+        });
         //end region
     });
 };
@@ -329,7 +344,7 @@ function startDeal(socket, confirmId, broadcastId, postId, bestPirceChoose, driv
             let confirmStore = await confirmData.findById(confirmId);
             if (!confirmStore.driverId || !confirmStore.userId){
                 updateDriverActivity(0,driverId);
-                socket.emit('deal_build_error',{message:'this user busy'});
+                socket.emit('deal_build_error',{message:'This user busy'});
                 await confirmData.remove({'_id':confirmId});
                 return;
             }
@@ -354,9 +369,13 @@ function startDeal(socket, confirmId, broadcastId, postId, bestPirceChoose, driv
 }
 
 let sortBID = (a,b) =>{
-    if (a.price > b.price) return -1;
-    if (a.price < b.price) return 1;
-    return 0;
+    if (a.price < b.price) return -1;
+    if (a.price > b.price) return 1;
+    if (a.price===b.price){
+        let c = new Date(a.expiredTime);
+        let d = new Date(b.expiredTime);
+        return c - d;
+    }
 };
 
 let findDriver = async (postId) =>{

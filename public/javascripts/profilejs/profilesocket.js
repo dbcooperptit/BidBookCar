@@ -85,6 +85,7 @@ var bidSocket = {
 
         socket.on('driverBidToUser', data => {
             console.log(data);
+            showDialogNotify("Được cập nhật mới","Book Bike","info");
             displayListBid(data.allBid);
         });
 
@@ -103,23 +104,22 @@ var bidSocket = {
                 bestPirceChoose: price,
                 driverId: driverId
             };
-
             socket.emit('userConfirm',data);
+            let htmlDeal = '<img src="/images/giphy_2.gif" class="img-responsive" style="height: 200px;width: 100%;">\n';
+            $("#modal-info .modal-body").html(htmlDeal);
+            $('#modal-info .modal-title').html('Quá trình giao dịch dang diễn ra ...');
         });
 
         socket.on('deal_build_error',data =>{
-            $('#modal-info').modal('hide');
-            bootbox.alert({
-                message: data.message,
-                size: 'small'
-            });
+            $("#modal-info").modal('show');
+            $("#modal-info .modal-body").html(data.message);
+            $('#modal-info .modal-title').html('Thông báo');
         });
+
         socket.on('deal_build_success',data=>{
-            $('#modal-info').modal('hide');
-            bootbox.alert({
-                message: data.message,
-                size: 'small'
-            });
+            $("#modal-info").modal('show');
+            $("#modal-info .modal-body").html(data.message);
+            $('#modal-info .modal-title').html('Thông báo');
         });
 
         $('#book-bike').on('click','.customer-choose-drivers', function () {
@@ -127,22 +127,24 @@ var bidSocket = {
             let postId = $("#id_post").val();
            socket.emit('customer_choose_driver',driverId, postId);
            $("#modal-info").modal('show');
-           $('#modal-info .modal-body').html("<h2>Đang chờ phản hồi từ driver</h2>");
+            let htmlDeal = '<img src="/images/giphy_2.gif" class="img-responsive" style="height: 200px;width: 100%;">\n';
+            $('#modal-info .modal-body').html(htmlDeal);
+            $("#modal-info .modal-title").text("Đang chờ phản hồi từ driver...");
 
         });
+
         socket.on('driver_busy_to_user',data=>{
             $("#modal-info").modal('show');
             let html = '<h2>'+data.message+'</h2>';
             $('#modal-info .modal-body').html(html);
-
+            $("#modal-info .modal-title").text("Thông báo");
         });
 
         socket.on('driver_report_success',data=>{
             $("#modal-info").modal('show');
             showDetailOrder(data.orderNew);
-            $("#modal-info .modal-footer").html(' <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>\n' +
-                '                <button type="button" class="btn btn-outline">Save changes</button>');
             $("#book-bike").empty();
+            $("#modal-info .modal-title").text("Thông báo");
         });
 
         socket.on('reconnect', () => {

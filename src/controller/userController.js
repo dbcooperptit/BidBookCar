@@ -40,7 +40,6 @@ UserController.getProfile = async (req, res) => {
 
     //console.log(dataValid);
     await Promise.all(allOrder).then(item => {
-        console.log(item);
         res.render("profiles/index", { post: dataValid, newPostValid: newPostValid, user: req.user, listOrder: item });
     });
 
@@ -71,4 +70,30 @@ UserController.doUpdateUser = async (req, res, next) => {
     }
 };
 
+UserController.orderDetail = async (req,res,next) =>{
+    try {
+        let orderId = req.query.orderId;
+        let orderDetailRaw = await Order.findById(orderId);
+        let customer = (await userRepository.findById(orderDetailRaw.userId));
+        let driver = (await userRepository.findById(orderDetailRaw.driverId));
+        let dataRes ={
+            'orderId': orderId,
+            'customerName': customer.fullName,
+            'customerPicture':customer.picture,
+            'customerPhone':customer.phone,
+
+            'driverName': driver.fullName,
+            'driverPicture':driver.picture,
+            'driverPhone':driver.phone,
+
+            'location': orderDetailRaw.location,
+            'destination': orderDetailRaw.destination,
+            'price': orderDetailRaw.price,
+            'createAt': orderDetailRaw.createAt
+        };
+        res.send(dataRes);
+    }catch (e) {
+        throw e;
+    }
+};
 module.exports = UserController;
