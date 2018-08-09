@@ -1,7 +1,10 @@
 var postRepository = require('../repository/postRepository');
 var userRpeository  = require('../repository/userRepository');
 var orderRepository = require('../repository/orderRepository');
+var config 	= require('../config');
 var DriverController={}
+
+var redis = require('redis');
 
 DriverController.index = async(req,res,next) =>{
   let allPostRaw = await postRepository.findAll();
@@ -34,6 +37,8 @@ DriverController.index = async(req,res,next) =>{
 };
 
 DriverController.topDriver = async (req,res,next) =>{
+    let client = redis.createClient('redis://' + config.redis.user + ':' + config.redis.password + '@' + config.redis.host + ':' + config.redis.port);
+
     let allOrder = await orderRepository.findAll();
     let driverId = allOrder
         .map(x=>x.driverId)
@@ -55,8 +60,29 @@ DriverController.topDriver = async (req,res,next) =>{
         return {'driver':driver,'total':x.total};
     });
 
-    await Promise.all(topDriver).then(item => res.send(item));
+     Promise.all(topDriver).then(item =>{
+        client.smembers('driver_activity_status',(err, replies)=>{
+           if (err) throw err;
+           console.log("Replies: "+replies);
+           let driverActivity = replies.map(x=>JSON.parse(x));
+           let data = item.map(i=>{
+              let active = 1;
+              driverActivity.forEach(da=>{
+                  if (da.driverId === i.driver._id){
+                      active = da.status;
+                  }
+              });
+              return {
+                  'driver':i.driver,
+                  'total':i.total,
+                  'activity': active === 0 ? 'Online':'Offline'
+              }
+           });
+           res.send(data);
+        });
+    });
 };
+
 
 var sortbyDate = (a, b) =>{
     var c = new Date(a.createAt);

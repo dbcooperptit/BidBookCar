@@ -213,7 +213,7 @@
                                         <a href="#" class="btn btn-default btn-flat">Profile</a>
                                     </div>
                                     <div class="pull-right">
-                                        <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                                        <a href="/logout" class="btn btn-default btn-flat">Sign out</a>
                                     </div>
                                 </li>
                             </ul>
@@ -353,85 +353,8 @@
                         </h1>
                     </div>
                     <div class="content">
-                        <div class="box box-info">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Latest Orders</h3>
+                        <div class="box box-info" id="top-drivers-bid">
 
-                                <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
-                                                class="fa fa-minus"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i
-                                                class="fa fa-times"></i></button>
-                                </div>
-                            </div>
-                            <!-- /.box-header -->
-                            <div class="box-body">
-                                <div class="table-responsive">
-                                    <table class="table no-margin">
-                                        <thead>
-                                        <tr>
-                                            <th>Order ID</th>
-                                            <th>Item</th>
-                                            <th>Status</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr>
-                                            <td><a href="pages/examples/invoice.html">OR9842</a></td>
-                                            <td>Call of Duty IV</td>
-                                            <td><span class="label label-success">Shipped</span></td>
-
-                                        </tr>
-                                        <tr>
-                                            <td><a href="pages/examples/invoice.html">OR1848</a></td>
-                                            <td>Samsung Smart TV</td>
-                                            <td><span class="label label-warning">Pending</span></td>
-
-                                        </tr>
-                                        <tr>
-                                            <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                            <td>iPhone 6 Plus</td>
-                                            <td><span class="label label-danger">Delivered</span></td>
-
-                                        </tr>
-                                        <tr>
-                                            <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                            <td>Samsung Smart TV</td>
-                                            <td><span class="label label-info">Processing</span></td>
-
-                                        </tr>
-                                        <tr>
-                                            <td><a href="pages/examples/invoice.html">OR1848</a></td>
-                                            <td>Samsung Smart TV</td>
-                                            <td><span class="label label-warning">Pending</span></td>
-
-                                        </tr>
-                                        <tr>
-                                            <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                            <td>iPhone 6 Plus</td>
-                                            <td><span class="label label-danger">Delivered</span></td>
-
-                                        </tr>
-                                        <tr>
-                                            <td><a href="pages/examples/invoice.html">OR9842</a></td>
-                                            <td>Call of Duty IV</td>
-                                            <td><span class="label label-success">Shipped</span></td>
-
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <!-- /.table-responsive -->
-                            </div>
-                            <!-- /.box-body -->
-                            <div class="box-footer clearfix">
-                                <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Place New
-                                    Order</a>
-                                <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All
-                                    Orders</a>
-                            </div>
-                            <!-- /.box-footer -->
                         </div>
                     </div>
                 </div>
@@ -489,18 +412,52 @@
             countDownsBlock(idPost);
         });
 
-        $.ajax({
-            url:'/drivers/top',
-            dataType:'json',
-            type:'GET',
-            success: function (data) {
-                console.log(data);
-            },
-            error: function (err) {
-                console.log(err.responseText);
-            }
-        })
+        setTimeout(()=>{
+            $.ajax({
+                url:'/drivers/top',
+                dataType:'json',
+                type:'GET',
+                success: function (data) {
+                    console.log(data);
+                    topDriver(data);
+                },
+                error: function (err) {
+                    console.log(err.responseText);
+                }
+            })
+        },5000)
     });
+    let topDriver = (data) =>{
+        let liHtml = liData(data)
+        let html =
+            '            <div class="box-body">\n' +
+            '              <ul class="products-list product-list-in-box">\n' +
+                                liHtml+
+            '              </ul>\n' +
+            '            </div>\n' ;
+        $('#top-drivers-bid').html(html);
+    }
+    let liData = (listData)=>{
+        let html='';
+        listData.forEach(data=>{
+            let value = data.activity === 0? 'success':'yellow';
+            html +=
+            '                <li class="item">\n' +
+            '                  <div class="product-img">\n' +
+            '                    <img src="'+data.driver.picture+'" alt="'+data.driver.fullName+'">\n' +
+            '                  </div>\n' +
+            '                  <div class="product-info">\n' +
+            '                    <a href="javascript:void(0)" class="product-title">'+ data.driver.fullName +
+            '                      <span class="label label-warning pull-right">'+data.total+'</span></a>\n' +
+                                '<span class="product-description">\n' +
+                                    '<a href="#"><i class="fa fa-circle text-'+value+'"></i>'+data.activity+'</a>'+
+                '                        </span>'+
+            '                  </div>\n' +
+
+            '                </li>\n';
+        })
+        return html;
+    }
 </script>
 </body>
 </html>

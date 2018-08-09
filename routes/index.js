@@ -12,7 +12,11 @@ router.get('/', function(req, res, next) {
 router.get('/login', function(req, res, next) {
     if(req.isAuthenticated()){
         let url = authController.getUrlByRoles(req,res);
-        res.redirect(url+'/profiles');
+        if (url==="/users") {
+            res.redirect(url + '/profiles');
+        }else{
+            res.redirect(url);
+        }
     }else {
 
         res.render('login/signin', {
@@ -46,7 +50,16 @@ router.post('/doLogin', passport.authenticate('local-login', {
 }),(req, res) =>{
     let url = authController.getUrlByRoles(req,res);
     console.log(url);
-    res.redirect(url+'/profiles');
+    if (url==="/users") {
+        res.redirect(url + '/profiles');
+    }else{
+        res.redirect(url);
+    }
+});
+
+router.get('/logout',(req,res,next)=>{
+    req.logout();
+    res.redirect("/");
 });
 
 router.post('/doRegister',loginController.doRegister);
