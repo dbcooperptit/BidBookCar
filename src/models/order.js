@@ -4,14 +4,16 @@ var OrderSchema =new mongoose.Schema({
    _id:{
        type: String
    },
-    userId: {
-       type: String,
+    userId:{
+        type: String,
         required: true
     },
+
     driverId: {
-       type: String,
-        required:true
+        type: String,
+        required: true
     },
+
     location:{
        type: String,
         required: true

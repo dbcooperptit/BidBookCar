@@ -1,5 +1,5 @@
 var User = require("../models/user.js");
-
+var Order = require("../models/order");
 //show list all Customer
 exports.all_user = function(req, res, next){  
 	User.find({role:'user'},function(err,dulieu){
@@ -26,6 +26,28 @@ exports.active_user = async (req, res, next) => {
 		console.log(e);
 	}
 };
+
+exports.all_order = async (req,res,next)=>{
+	try {
+		let allOrderRaw = await Order.find();
+		let allOrder = allOrderRaw.map(async x=>{
+			let customerName = (await User.findById(x.userId)).fullName;
+			let driverName = (await User.findById(x.driverId)).fullName;
+			return {
+				'orderId':x._id,
+				'customerName':customerName,
+				'driverName': driverName,
+				'location':x.location,
+				'destination':x.destination,
+				'price':x.price,
+				'createAt':x.createAt
+			}
+		});
+		await Promise.all(allOrder).then(item => res.render('',{'dataItem':item}));
+    }catch (e) {
+		throw e;
+    }
+}
 
 //show list all Driver
 exports.all_driver = function(req, res, next){  

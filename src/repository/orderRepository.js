@@ -1,5 +1,4 @@
 var Order = require('../models/order')
-
 var OrderRepository = {}
 OrderRepository.saveOrder = async (data)=>{
   try {
@@ -18,5 +17,5 @@ OrderRepository.findAll = async () =>{
     }catch (e) {
         throw e;
     }
-}
+};
 module.exports = OrderRepository;
