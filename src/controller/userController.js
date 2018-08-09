@@ -1,5 +1,6 @@
 var userRepository = require("../repository/userRepository");
 var postRepository = require("../repository/postRepository");
+var Order = require("../models/order");
 var bcrypt = require('bcrypt-nodejs');
 const SALT_WORK_FACTOR = 10;
 var UserController = {};
@@ -16,14 +17,35 @@ UserController.getProfile = async (req, res) => {
     if (dataValid.length > 0) {
         newPostValid = false;
     }
-    dataValid.forEach(x=>x.bid.sort((a,b)=>{
-       if(a.price > b.price) return -1;
-       if(a.price < b.price) return -1;
-       return 0;
+    dataValid.forEach(x => x.bid.sort((a, b) => {
+        if (a.price > b.price) return -1;
+        if (a.price < b.price) return -1;
+        return 0;
     }));
+
+    let allOrderRaw = await Order.find({ 'userId': userId });
+    var allOrder = allOrderRaw.map(async x => {
+        let customerName = (await userRepository.findById(x.userId)).fullName;
+        let driverName = (await userRepository.findById(x.driverId)).fullName;
+        return {
+            'orderId': x._id,
+            'customerName': customerName,
+            'driverName': driverName,
+            'location': x.location,
+            'destination': x.destination,
+            'price': x.price,
+            'createAt': x.createAt
+        }
+    });
+
     //console.log(dataValid);
-    res.render("profiles/index", { post: dataValid, newPostValid: newPostValid, user: req.user });
+    await Promise.all(allOrder).then(item => {
+        console.log(item);
+        res.render("profiles/index", { post: dataValid, newPostValid: newPostValid, user: req.user, listOrder: item });
+    });
+
 };
+
 UserController.doUpdateUser = async (req, res, next) => {
     let email = req.body.email;
     console.log(email);
@@ -48,4 +70,5 @@ UserController.doUpdateUser = async (req, res, next) => {
         }
     }
 };
+
 module.exports = UserController;
