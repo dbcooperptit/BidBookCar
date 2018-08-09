@@ -43,11 +43,17 @@ exports.all_order = async (req,res,next)=>{
 				'createAt':x.createAt
 			}
 		});
-		await Promise.all(allOrder).then(item => res.render('',{'dataItem':item}));
+		await Promise.all(allOrder).then(item => {
+			res.render('admins/order', { title: 'Manager Order', data:item})
+		});
     }catch (e) {
 		throw e;
     }
 }
+
+// exports.all_order = function(req, res, next){ 
+// 		res.render('admins/order', { title: 'Manager Order'});
+// };
 
 //show list all Driver
 exports.all_driver = function(req, res, next){  
@@ -74,4 +80,12 @@ exports.active_driver = async (req, res, next) => {
 		// statements
 		console.log(e);
 	}
+};
+
+exports.delete_order =async function(req, res, next){  
+	var id = req.params.idcanxoa;
+	console.log(id);
+	await Order.remove({'_id':id});
+	res.redirect("/admins/order")
+
 };

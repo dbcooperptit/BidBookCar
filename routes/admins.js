@@ -21,5 +21,11 @@ router.get('/driver', adminController.all_driver);
 //active Driver
 router.post('/activeDriverAjax', adminController.active_driver);
 
+//Order
+router.get('/order', adminController.all_order);
+
+//Delete Order
+router.get('/deleteOrder/:idcanxoa', adminController.delete_order);
+
 
 module.exports = router;
