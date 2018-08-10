@@ -443,6 +443,7 @@ var countDown = (time) => {
                 inputType: 'number',
                 callback: function (result) {
                     let value = result == null ? 0 : result;
+                    value = value < 0 ? 0 : value;
                     $('#end-timeout').attr('data-value', value);
                     $('#end-timeout').click();
                 }

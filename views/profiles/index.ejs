@@ -400,18 +400,15 @@
                                                         <td>1</td>
                                                         <td><%= x.bid[1].fullName %></td>
                                                         <td>
-                                                            <span class="badge bg-warning"><%= x.bid[1].price %>
+                                                            <span class="badge bg-yellow"><%= x.bid[1].price %>
                                                                 VNĐ</span>
                                                         </td>
+
                                                         <td>
-                                                            <span class="badge bg-warning arrivalTime"
-                                                                  data-bind="<%= x.bid[1].awaitTime %>"></span>
+                                                            <span class="badge bg-yellow arrivalTime"><%= (new Date(x.bid[1].awaitTime)).toLocaleTimeString() %></span>
                                                         </td>
                                                         <td>
-                                                            <span class="badge bg-red arrivalTime"><%= (new Date(x.bid[1].awaitTime)).toLocaleTimeString() %></span>
-                                                        </td>
-                                                        <td>
-                                                            <a class="badge bg-red customer-choose-drivers"
+                                                            <a class="badge bg-yellow customer-choose-drivers"
                                                                data-driverid="<%= x.bid[1].driverId %>"> Chọn </a>
                                                         </td>
                                                     </tr>
@@ -423,12 +420,9 @@
                                                         <td>
                                                             <span class="badge bg-aqua"><%= x.bid[2].price %> VNĐ</span>
                                                         </td>
+
                                                         <td>
-                                                            <span class="badge bg-aqua arrivalTime"
-                                                                  data-bind="<%= x.bid[2].awaitTime %>"></span>
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge bg-red arrivalTime"><%= (new Date(x.bid[2].awaitTime)).toLocaleTimeString() %></span>
+                                                            <span class="badge bg-aqua arrivalTime"><%= (new Date(x.bid[2].awaitTime)).toLocaleTimeString() %></span>
                                                         </td>
                                                         <td>
                                                             <a class="badge bg-red customer-choose-drivers"
@@ -444,12 +438,9 @@
                                                         <td>
                                                             <span class="badge bg-gray"><%= x.bid[l].price %> VNĐ</span>
                                                         </td>
+
                                                         <td>
-                                                            <span class="badge bg-gray arrivalTime"
-                                                                  data-bind="<%= x.bid[l].awaitTime %>"></span>
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge bg-red arrivalTime"><%= (new Date(x.bid[l].awaitTime)).toLocaleTimeString() %></span>
+                                                            <span class="badge bg-gray arrivalTime"><%= (new Date(x.bid[l].awaitTime)).toLocaleTimeString() %></span>
                                                         </td>
                                                         <td>
                                                             <a class="badge bg-red customer-choose-drivers"

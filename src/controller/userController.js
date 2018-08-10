@@ -18,7 +18,7 @@ UserController.getProfile = async (req, res) => {
         newPostValid = false;
     }
     dataValid.forEach(x => x.bid.sort((a, b) => {
-        if (a.price > b.price) return -1;
+        if (a.price > b.price) return 1;
         if (a.price < b.price) return -1;
         return 0;
     }));

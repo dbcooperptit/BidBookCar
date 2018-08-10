@@ -12,6 +12,9 @@ var orderRepository = require('../repository/orderRepository');
 // 1: đang bận.
 let client = '';
 let redis_key = config.redis_key.key_1;
+
+var userTimeOut = [];
+
 var processEvent = (io) =>{
     io.of("/bidchannel").on('connection',socket => {
         socket.on('init_channel',async () =>{
@@ -29,8 +32,22 @@ var processEvent = (io) =>{
                 let driverStatus = {
                     driverId: userId,
                     status:0
+                };
+                console.log(userTimeOut);
+                let existDriverId = false;
+                userTimeOut.forEach(x=>{
+                   if (x.driverId === userId){
+                       existDriverId=true;
+                   }
+                });
+                if (!existDriverId) {
+                    console.log("Init: not include");
+                    client.srem(redis_key, JSON.stringify({
+                        driverId: userId,
+                        status: 1
+                    }));
+                    client.sadd(redis_key, JSON.stringify(driverStatus));
                 }
-                client.sadd(redis_key,JSON.stringify(driverStatus));
             }
 
             console.log('userId: '+userId);
@@ -310,7 +327,13 @@ var processEvent = (io) =>{
             await postRepository.updateExpiredTime(updatePost);
             socket.emit('driver_report_success',{'orderNew':orderNew,'postId':postId});
             socket.broadcast.to(userId+"_private").emit('driver_report_success',{'orderNew':orderNew,'postId':postId});
+            //let userTimeOut = global.userTimeOut;
+            userTimeOut.push({
+                driverId
+            });
+            //global.userTimeOut = userTimeOut;
             setTimeout(()=>{
+                userTimeOut = userTimeOut.filter(x=>x.driverId !== driverId);
                 updateDriverActivity(0,driverId);
             },120000);
         });
@@ -335,6 +358,22 @@ var processEvent = (io) =>{
             }
             socket.broadcast.emit('reload_driver_activity',{message: 'disconnect'});
         });
+
+        // socket.on('reconnect',async()=>{
+        //     if (!socket.request.session.passport){
+        //         return;
+        //     }
+        //     let userId = socket.request.session.passport.user;
+        //     let user = await userRepository.findById(userId);
+        //     //let userTimeOut=global.userTimeOut;
+        //     if (user.role === 'driver'){
+        //         if (userTimeOut.includes(userId)) {
+        //             return
+        //         }else{
+        //             updateDriverActivity(0, userId);
+        //         }
+        //     }
+        // });
         //end region
     });
 };
@@ -360,7 +399,15 @@ function startDeal(socket, confirmId, broadcastId, postId, bestPirceChoose, driv
             let orderDetail = await orderRepository.saveOrder(order);
             socket.emit('deal_build_success',{message: 'Giao dịch thành công'});
             socket.broadcast.to(broadcastId+"_private").emit('deal_build_success',{message: 'Giao dịch thành công'});
+
+           // let userTimeOut = global.userTimeOut;
+            userTimeOut.push({
+                driverId
+            });
+            //global.userTimeOut = userTimeOut;
+
             setTimeout(()=>{
+                userTimeOut = userTimeOut.filter(x=>x.driverId !== driverId);
                updateDriverActivity(0,confirmStore.driverId);
             },120000);
             //await confirmData.remove({'_id':confirmId});
@@ -371,7 +418,7 @@ function startDeal(socket, confirmId, broadcastId, postId, bestPirceChoose, driv
 let sortBID = (a,b) =>{
     if (a.price < b.price) return -1;
     if (a.price > b.price) return 1;
-    if (a.price===b.price){
+    if (a.price === b.price){
         let c = new Date(a.expiredTime);
         let d = new Date(b.expiredTime);
         return c - d;
