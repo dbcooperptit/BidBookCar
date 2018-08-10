@@ -64,4 +64,7 @@ router.get('/logout',(req,res,next)=>{
 
 router.post('/doRegister',loginController.doRegister);
 
+router.get('/getTimeServer',function (req,res,next) {
+   res.send(new Date());
+});
 module.exports = router;

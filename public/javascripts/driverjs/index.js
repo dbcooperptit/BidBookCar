@@ -332,11 +332,22 @@ let showFooterModal = (data) =>{
 let countDownsBlock = (idPost) => {
     let expiredTime = $('#' + idPost).find('.count-downs-expiredTime').attr('data-await-time');
     var countDownDate = new Date(expiredTime).getTime();
-
+    let differrence =0;
+    $.ajax({
+        url:'/getTimeServer',
+        type:'GET',
+        dataType:'json',
+        success: function (data) {
+            differrence = (new Date().getTime ()) -  (new Date(data).getTime());
+        } ,
+        error: function (err) {
+            console.log(err.responseText);
+        }
+    });
 // Update the count down every 1 second
     var x = setInterval(function () {
 
-        var now = new Date().getTime();
+        var now = new Date().getTime() - differrence;
 
         // Find the distance between now an the count down date
         var distance = countDownDate - now;

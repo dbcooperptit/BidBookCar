@@ -403,11 +403,25 @@ var localDateTime = (time) =>{
 
 var countDown = (time) => {
     var countDownDate = new Date(time).getTime();
+    let differrence =0;
+    $.ajax({
+        url:'/getTimeServer',
+        type:'GET',
+        dataType:'json',
+        success: function (data) {
+            differrence = (new Date().getTime ())-  (new Date(data).getTime());
+            console.log(data);
+            console.log(differrence);
+        } ,
+        error: function (err) {
+            console.log(err.responseText);
+        }
+    });
 
 // Update the count down every 1 second
     var x = setInterval(function () {
 
-        var now = new Date().getTime();
+        var now =(new Date().getTime()) - differrence;
 
         // Find the distance between now an the count down date
         var distance = countDownDate - now;
@@ -417,9 +431,9 @@ var countDown = (time) => {
 
         // Display the result in the element with id="demo"
        // document.getElementById("count-downs").innerHTML = minutes + "m " + seconds + "s ";
-        if($("#count-downs").length < 1){
-            clearInterval(x);
-        }
+       //  if($("#count-downs").length < 1){
+       //      clearInterval(x);
+       //  }
         $("#count-downs").text( minutes + "m " + seconds + "s ");
         // If the count down is finished, write some text
         if (distance < 0) {

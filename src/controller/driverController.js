@@ -31,7 +31,7 @@ DriverController.index = async(req,res,next) =>{
   });
   await Promise.all(dataNewAsync)
       .then((item) =>{
-          res.render('drivers/index',{'dataIndex':item});
+          res.render('drivers/index',{'dataIndex':item,'driver':req.user});
       });
 
 };
